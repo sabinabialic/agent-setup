@@ -1,6 +1,6 @@
 # agent-skills
 
-A collection of skills that I use in my development process.
+A collection of skills that I use in my development process with OpenCode and Copilot.
 
 ## Superpowers
 
@@ -9,11 +9,3 @@ A collection of skills that I use in my development process.
 ## Stop Slop
 
 [stop-slop](https://github.com/hardikpandya/stop-slop/tree/main)
-
-## Firecrawl
-
-[firecrawl](https://github.com/firecrawl/opencode-firecrawl)
-
-## Terraform
-
-[terraform-skill](https://github.com/antonbabenko/terraform-skill)

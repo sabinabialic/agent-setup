@@ -1,5 +1,5 @@
 ---
-name: orchestrating-feature-implementation
+name: feature-implementation
 description: Use when implementing a feature from a source document or current-session context and the work benefits from delegated discovery, testing, review, or an evolving shared plan.
 ---
 

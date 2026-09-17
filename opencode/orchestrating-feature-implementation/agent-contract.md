@@ -23,6 +23,7 @@ are excluded. The agent must report any scope conflict before changing files.
 - Files changed
 - Commands run and exact results
 - Failures or unresolved questions
+- Reusable learning candidates, including applicability and supporting evidence
 - Recommended next steps
 
 Reports must distinguish observed facts, assumptions, and recommendations.
@@ -89,3 +90,6 @@ the evidence and recording it in the worklog.
 - Preserves disagreement, superseded assumptions, failures, and residual risk
   in the worklog, and owns phase transitions, follow-up assignments, and final
   status.
+- Decides whether verified, reusable, actionable candidates are promoted to
+  `docs/feature-learnings.md`, records the disposition in the worklog, and
+  marks outdated curated guidance as superseded.

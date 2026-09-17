@@ -19,6 +19,9 @@
 ## Discoveries
 - [timestamp] Evidence from code, docs, tests, or runtime behavior
 
+## Reusable Learning Candidates
+- [timestamp] Candidate guidance, evidence, applicability, and promotion status
+
 ## Implementation Log
 - [timestamp] Agent, files changed, summary, verification
 
@@ -47,5 +50,10 @@
 - Agents may read the worklog and return reports, but only the conductor merges
   reports into shared worklog state and updates its sections after
   reconciliation.
+- Treat a candidate as eligible for promotion only when it is verified,
+  reusable across features, and actionable. At completion, the conductor
+  records its promotion or rejection and rationale. Promoted guidance belongs
+  in `docs/feature-learnings.md`; link it to this worklog and mark superseded
+  guidance in place rather than deleting it.
 - Record every phase transition or rollback with its timestamp, reason, and
   evidence. Failed checks remain recorded and become explicit follow-up work.

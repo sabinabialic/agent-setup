@@ -29,6 +29,11 @@ and original plan; append new knowledge with timestamps and mark superseded
 assumptions rather than deleting them. Every agent reads the current worklog
 before acting and returns the fields in the [Agent contract](agent-contract.md).
 
+Use `docs/feature-learnings.md` as a curated, cross-feature record. Before
+acting, inspect it for applicable verified guidance. The worklog remains the
+complete feature record; do not create a separate learnings file per feature
+or copy routine operational detail into the curated record.
+
 Inspect the brief, repository instructions, relevant files, conventions,
 acceptance criteria, and available test commands before implementation. Treat
 every ambiguous requirement as a blocking open question with an owner; do not
@@ -96,6 +101,15 @@ final test, lint, type-check, or build commands when available. Record exact
 commands, outcomes, and run context in the worklog. Report unverified areas,
 remaining risks, unresolved questions, and changed files explicitly. A report
 that merely says “tests pass” is not verification.
+
+At completion, the conductor reviews reported learning candidates and promotes
+only guidance that is verified, reusable, and actionable to
+`docs/feature-learnings.md`. Each promoted entry links to its source worklog,
+states where it applies, and identifies a review trigger where appropriate.
+Exclude transient debugging notes, feature-specific detail, unverified
+hypotheses, secrets, and duplicated worklog evidence. Mark outdated guidance
+as superseded instead of deleting it. Recording that no candidate qualified is
+valid and needs no curated-file update.
 
 Completion is forbidden when required verification is missing or blocking
 questions/findings remain. Record ambiguity, disagreement, failed checks,

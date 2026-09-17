@@ -72,10 +72,16 @@ continues. Inspection alone does not clear the finding.
 
 ## Testing, Review, And Iteration
 
-In `testing`, run targeted tests for the changed scope and record the exact
-command and result. Before or alongside conductor-run final verification,
-delegate targeted test creation or execution to a specialized testing agent
-using the testing-agent handoff/report contract in the [Agent contract](agent-contract.md).
+In `testing`, run the narrowest relevant existing checks for the changed scope
+and record the exact command and result. Add a new test only when it covers a
+meaningful regression risk, non-trivial behavior, or an explicit acceptance
+criterion that existing checks do not cover. Do not add tests solely to raise
+coverage or to exercise trivial wiring, formatting, or unchanged behavior.
+When new coverage is justified, delegate its creation or execution to a
+specialized testing agent using the testing-agent handoff/report contract in
+the [Agent contract](agent-contract.md); otherwise, delegate execution of the
+existing checks only. Record why new tests were added or why existing checks
+were sufficient.
 The testing agent reports exact commands, results, failures, and unresolved
 production fixes; it does not silently repair production code. A failed test
 remains evidence, is not weakened or deleted, and becomes an explicit fix task.

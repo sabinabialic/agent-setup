@@ -1,6 +1,6 @@
-# agent-skills
+# agent-setup
 
-A collection of skills that I use in my development process with OpenCode and Copilot.
+A collection of tools and skills that I use in my development process.
 
 ## Superpowers
 

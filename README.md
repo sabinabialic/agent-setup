@@ -2,6 +2,17 @@
 
 A collection of tools and skills that I use in my development process.
 
+## Skills
+
+opencode skills under `opencode/<name>/SKILL.md`, loaded automatically when a
+task matches their trigger. See [docs/skills.md](docs/skills.md) for details on
+each:
+
+- **pr-review** — staff-level, evidence-based review of a branch/PR diff
+- **writing-pr-descriptions** — PR descriptions optimized for review speed
+- **push-lock** — git-native lock to serialize concurrent agent pushes
+- **feature-implementation** — conductor + worklog orchestration for delegated feature work
+
 ## Superpowers
 
 [superpowers](https://github.com/obra/superpowers/tree/main)

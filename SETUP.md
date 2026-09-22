@@ -129,8 +129,8 @@ Sanity checks:
 |----------|------------------------------------|------------------------------|
 | planner  | `github-copilot/claude-opus-4.8`   | Deep reasoning               |
 | reviewer | `github-copilot/claude-opus-4.8-fast` | Judgment, lower latency   |
-| coder    | `github-copilot/claude-sonnet-4.6` | Mechanical implementation    |
-| tester   | `github-copilot/claude-sonnet-4.6` | Structured, bounded          |
+| coder    | `github-copilot/claude-sonnet-5` | Mechanical implementation    |
+| tester   | `github-copilot/claude-sonnet-5` | Structured, bounded          |
 | ship     | `github-copilot/claude-haiku-4.5`  | Pure coordination            |
-| (default)| `github-copilot/claude-sonnet-4.6` | Interactive default          |
+| (default)| `github-copilot/claude-sonnet-5` | Interactive default          |
 | (small)  | `github-copilot/claude-haiku-4.5`  | Titles, summaries, compaction |

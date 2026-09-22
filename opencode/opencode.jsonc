@@ -3,17 +3,17 @@
   "model": "github-copilot/claude-sonnet-5",
   "small_model": "github-copilot/claude-haiku-4.5",
   "plugin": [
+    "@hashicorp/opencode-bob-gateway-plugin",
     "superpowers@git+https://github.com/obra/superpowers.git",
     "opencode-firecrawl"
   ],
   "mcp": {
     "github": {
-      "type": "remote",
-      "url": "https://api.githubcopilot.com/mcp/",
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-github"],
       "enabled": true,
-      "headers": {
-        "Authorization": "Bearer ${GITHUB_MCP_PAT}",
-        "X-MCP-Readonly": "true"
+      "environment": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_MCP_PAT}"
       }
     }
   }

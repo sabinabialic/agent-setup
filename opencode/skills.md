@@ -103,8 +103,8 @@ branch or when a single process owns all pushes.
 ## feature-implementation
 
 `opencode/feature-implementation/SKILL.md` (with
-[`agent-contract.md`](../opencode/feature-implementation/agent-contract.md) and
-[`worklog-template.md`](../opencode/feature-implementation/worklog-template.md))
+[`agent-contract.md`](feature-implementation/agent-contract.md) and
+[`worklog-template.md`](feature-implementation/worklog-template.md))
 
 **What it does.** Orchestrates implementing a feature through delegated agents.
 The primary agent acts as a conductor: it owns scope, phase transitions, report

@@ -5,7 +5,7 @@ A collection of tools and skills that I use in my development process.
 ## Skills
 
 opencode skills under `opencode/<name>/SKILL.md`, loaded automatically when a
-task matches their trigger. See [docs/skills.md](docs/skills.md) for details on
+task matches their trigger. See [opencode/skills.md](opencode/skills.md) for details on
 each:
 
 - **pr-review** — staff-level, evidence-based review of a branch/PR diff

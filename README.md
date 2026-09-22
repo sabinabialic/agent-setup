@@ -28,7 +28,14 @@ A four-stage build pipeline under `opencode/agent` and `opencode/command`, chain
 - **planner** (opus) — turns a feature request into a detailed spec: exact file paths, function signatures, and edge cases → `.pipeline/spec.md`
 - **coder** (sonnet) — implements exactly what the spec says → `.pipeline/changes.md`
 - **tester** (sonnet) — writes and runs tests for the spec's edge cases and happy path, no redundant tests → `.pipeline/tests.md`
-- **reviewer** (sonnet, read-only) — reads spec, changes, and diff and returns a PASS/FAIL verdict → `.pipeline/review.md`
-- **ship** — orchestrator that chains the stages and auto-loops once on a FAIL verdict
+- **reviewer** (opus-fast, read-only) — reads spec, changes, and diff and returns a PASS/FAIL verdict → `.pipeline/review.md`
+- **ship** (haiku) — orchestrator that chains the stages and auto-loops once on a FAIL verdict
 
 Install by copying `opencode/agent` and `opencode/command` into `~/.config/opencode`, then run `/ship <feature request>`.
+
+## Choosing a workflow
+
+`/ship` and `feature-implementation` are not interchangeable. The decision rule
+for which to use — plus how `subagent-driven-development` fits downstream — lives
+in [opencode/AGENTS.md](opencode/AGENTS.md), which opencode auto-loads as global
+instructions when copied to `~/.config/opencode/AGENTS.md`.

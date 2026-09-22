@@ -1,7 +1,7 @@
 ---
 description: Reads the spec and the coder's changes, then writes and runs tests covering the edge cases and happy path with no redundant tests. Third stage of the /ship pipeline.
 mode: subagent
-model: github-copilot/claude-sonnet-4.5
+model: github-copilot/claude-sonnet-4.6
 temperature: 0.1
 permission:
   edit: allow

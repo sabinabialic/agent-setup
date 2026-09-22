@@ -1,7 +1,7 @@
 ---
 description: Orchestrates the full build pipeline — planner, coder, tester, reviewer — chaining them through the .pipeline folder. Invoked by the /ship command.
 mode: primary
-model: github-copilot/claude-sonnet-4.5
+model: github-copilot/claude-haiku-4.5
 temperature: 0.1
 permission:
   edit: allow

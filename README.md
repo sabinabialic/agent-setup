@@ -2,6 +2,8 @@
 
 A collection of tools and skills that I use in my development process.
 
+To replicate this whole setup on a new machine, follow [SETUP.md](SETUP.md).
+
 ## Skills
 
 opencode skills under `opencode/<name>/SKILL.md`, loaded automatically when a

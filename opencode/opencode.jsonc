@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "github-copilot/claude-sonnet-4.6",
+  "small_model": "github-copilot/claude-haiku-4.5",
+  "plugin": [
+    "@hashicorp/opencode-bob-gateway-plugin",
+    "superpowers@git+https://github.com/obra/superpowers.git",
+    "opencode-firecrawl"
+  ],
+  "mcp": {
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_MCP_PAT}",
+        "X-MCP-Readonly": "true"
+      }
+    }
+  }
+}

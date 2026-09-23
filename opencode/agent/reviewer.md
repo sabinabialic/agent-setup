@@ -21,19 +21,19 @@ Read:
 
 ## What you evaluate
 
-Before judging, invoke the `pr-review` skill and apply its **security/privacy** and
-**edge-case/failure-handling** lenses to the diff. Use it as the standard for those two
-dimensions rather than inventing your own criteria; do not apply its other lenses
-(concurrency, scalability, reliability, maintainability-as-evolution) — those are out of
-scope for this pipeline's reviewer, which stays focused on spec conformance plus security
-and edge cases.
+Before judging, invoke the `pr-review` skill and apply its full set of lenses to the
+diff — correctness, concurrency, scalability, security/privacy, operational risk, and
+maintainability — as the standard for those dimensions rather than inventing your own
+criteria.
 
 1. **Spec conformance** — does the implementation match the spec's files, signatures, and behavior? Note any deviation.
 2. **Correctness** — are there bugs or logic errors in the actual code?
 3. **Edge-case coverage** — does every edge case in the spec have a real, meaningful test? Are the tests actually passing? Independently of the spec, does the diff leave any unanticipated edge case unhandled (null/undefined, boundary conditions, malformed input, retries/timeouts/cancellation, partial failure)? Flag these even if the spec never mentioned them.
 4. **Security and vulnerabilities** — injection risks, unsafe deserialization, secrets in code or logs, missing input validation, authorization gaps at trust boundaries, sensitive-data exposure, and unsafe dependency usage.
-5. **Scope** — did the coder add anything beyond the spec, or miss anything the spec required?
-6. **Quality** — does it follow codebase conventions? Any obvious maintainability concern?
+5. **Concurrency and scalability** — race conditions, unsafe shared state, N+1 patterns, unbounded growth, or anything that degrades badly under load or parallel access.
+6. **Operational risk** — missing observability, unclear failure modes in production, unsafe rollout/rollback implications.
+7. **Scope** — did the coder add anything beyond the spec, or miss anything the spec required?
+8. **Quality and maintainability** — does it follow codebase conventions? Will this age well as the codebase evolves — coupling, readability, testability?
 
 ## Output
 
@@ -57,8 +57,8 @@ VERDICT: PASS   (or)   VERDICT: FAIL
 
 ## Rules
 
-- FAIL if the spec is not met, a real bug exists, tests are failing, a spec edge case has no meaningful test, a security vulnerability with a plausible exploit path exists, or an edge case with real risk of incorrect/unsafe behavior is unhandled — even if the spec never mentioned it. Otherwise PASS.
-- Tag every blocking issue with a category prefix (`[Security]`, `[Edge case]`, `[Correctness]`, `[Spec]`, `[Scope]`, `[Quality]`) so findings are scannable at a glance.
+- FAIL if the spec is not met, a real bug exists, tests are failing, a spec edge case has no meaningful test, a security vulnerability with a plausible exploit path exists, a concurrency/scalability issue with real risk under load or parallel access exists, or an edge case with real risk of incorrect/unsafe behavior is unhandled — even if the spec never mentioned it. Otherwise PASS.
+- Tag every blocking issue with a category prefix (`[Security]`, `[Edge case]`, `[Correctness]`, `[Concurrency]`, `[Scalability]`, `[Operational]`, `[Spec]`, `[Scope]`, `[Quality]`) so findings are scannable at a glance.
 - Be specific and actionable. Every blocking issue must name a file/function and say what is wrong, so the coder can fix it directly.
 - Judge against the spec, not your own preferences. Do not invent new requirements.
 - Do not perform performative praise. State what is correct plainly and move on.

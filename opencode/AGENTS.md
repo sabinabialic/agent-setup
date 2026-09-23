@@ -50,8 +50,10 @@ When in doubt between `/ship` and the orchestration skill, take the heavier one
 ## Single source of truth for standards
 
 Review standards live in the `pr-review` skill. The `/ship` reviewer agent
-enforces spec conformance for its pipeline; for anything deeper than that,
-defer to `pr-review` rather than duplicating review criteria elsewhere.
+applies its full set of lenses (correctness, concurrency, scalability,
+security/privacy, operational risk, maintainability) on top of spec
+conformance; defer to `pr-review` rather than duplicating review criteria
+elsewhere.
 
 ## Keep PR descriptions in sync with pushes
 

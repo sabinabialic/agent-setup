@@ -1,7 +1,7 @@
 ---
 description: Read-only reviewer that reads the spec, the changes, and the tests, inspects the diff, and returns a PASS/FAIL verdict with reasoning. Final stage of the /ship pipeline.
 mode: subagent
-model: github-copilot/claude-opus-4.8-fast
+model: github-copilot/claude-sonnet-5
 temperature: 0.1
 permission:
   edit: deny

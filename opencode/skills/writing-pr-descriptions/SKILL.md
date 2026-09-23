@@ -13,6 +13,8 @@ Write concise technical context, explicit review order, and concrete testing ste
 - Opening a new PR
 - Rewriting a weak PR description
 - Updating PR text after scope changes
+- **After pushing any new commit to an already-open PR** — this is mandatory,
+  not optional; see "Keeping Descriptions in Sync" below
 - Shipping stacked PRs that must be reviewed in sequence
 
 ## Template Source Selection
@@ -67,6 +69,31 @@ In merge order:
 ```
 
 If only two PRs are stacked, still enumerate both.
+
+## Keeping Descriptions in Sync With Pushes
+A PR description is a live document, not a one-time artifact. Every time you
+push new commits to an open PR — fixup commits, review responses, added
+scope, rebases that change the diff — update the description before
+considering the push done.
+
+1. Before pushing, check whether an open PR already exists for the branch:
+   `gh pr view --json number,body 2>/dev/null`.
+2. Push the commits.
+3. Re-derive each section from the current diff, not the original one. Pay
+   special attention to:
+   - `What & How` — new files/changes since the last description update.
+   - `Review Guide` — re-flag the highest-signal files if they changed.
+   - `Testing` — add or remove test commands to match what actually changed.
+   - `Anything Else?` — remove deferred items that got addressed; add new ones.
+4. Apply with `gh pr edit <number> --body "<updated body>"`. Do not just
+   append a changelog note — rewrite the relevant sections so the
+   description still reads as accurate top-to-bottom.
+5. If the push closes out everything in `Anything Else?`, drop the section
+   rather than leaving a stale "nothing else" placeholder.
+
+This applies regardless of which workflow produced the commits (`/ship`,
+manual work, orchestration-skill lane) and regardless of whether the push was
+triggered by CI feedback, human review comments, or your own follow-up work.
 
 ## Quality Bar
 - Descriptions should be understandable without opening local notes.

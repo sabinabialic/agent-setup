@@ -52,3 +52,20 @@ When in doubt between `/ship` and the orchestration skill, take the heavier one
 Review standards live in the `pr-review` skill. The `/ship` reviewer agent
 enforces spec conformance for its pipeline; for anything deeper than that,
 defer to `pr-review` rather than duplicating review criteria elsewhere.
+
+## Keep PR descriptions in sync with pushes
+
+Whenever you push new commits to an **open** PR branch — a fixup, a review
+response, a scope change, anything — update that PR's description in the
+same action, before moving on. A description that describes yesterday's diff
+is worse than no description.
+
+- Check `git status`/`gh pr view` for an open PR on the current branch before
+  pushing. If one exists, re-read the diff and revise the description with
+  `gh pr edit <number> --body "..."` after the push lands.
+- Use the `writing-pr-descriptions` skill for the structure and section
+  guidance — the same template applies to updates, not just first drafts.
+- This applies in both lanes: `/ship`'s `pr-writer` agent only runs once per
+  pipeline invocation, so any push you make manually after that (or via a
+  second `/ship` pass) still needs this sync step; the orchestration-skill
+  lane always needs it since there is no dedicated PR-writer stage.

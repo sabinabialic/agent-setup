@@ -1,13 +1,13 @@
 # Agent Contract
 
 This skill dispatches the `/ship` pipeline's specialized subagents—`planner`,
-`coder`, `tester`, and `reviewer`—which operate on `.pipeline/*.md` artifacts
+`coder`, `tester`, and `reviewer`—which operate on `.pipeline/<YYYY-MM-DD>-<feature-slug>/*.md` artifacts
 as their handoff and report mechanism. The worklog is the durable, append-only
 audit trail; `.pipeline/<YYYY-MM-DD>-<feature-slug>/` is the scratch layer for the subagents' native contracts.
 
 Every delegated agent must read the current worklog before acting. The worklog
 path is authoritative for assignment scope and phase state. Agents return
-structured reports (written to `.pipeline/*.md`); they do not merge their own
+structured reports (written to `.pipeline/<YYYY-MM-DD>-<feature-slug>/*.md`); they do not merge their own
 report into the worklog. Only the conductor reconciles reports and updates
 shared worklog state.
 

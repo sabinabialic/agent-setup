@@ -22,7 +22,9 @@ You receive a raw feature request from the orchestrator.
 
 ## Output
 
-Write your spec to `.pipeline/spec.md`. Write NOTHING else — do not modify any source file. You are a planner, not an implementer.
+Write your spec to the spec file path provided by the orchestrator (e.g., `.pipeline/2026-09-24-add-dark-mode/spec.md`). Write NOTHING else — do not modify any source file. The orchestrator will give you the exact path as part of the dispatch. You are a planner, not an implementer.
+
+**Path parameter:** The orchestrator provides the full `.pipeline/` file path in each dispatch. Use it exactly as given; do not assume the base folder or file names.
 
 The spec MUST contain, in this order:
 
@@ -40,4 +42,4 @@ The spec MUST contain, in this order:
 - YAGNI. Spec only what the request needs. No speculative features.
 - If the request is genuinely ambiguous, state the ambiguity in the spec and pick the most reasonable interpretation explicitly, rather than leaving it open.
 
-When done, report a one-line summary and confirm `.pipeline/spec.md` was written.
+When done, report a one-line summary and confirm the spec file (at the path provided by the orchestrator) was written successfully.

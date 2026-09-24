@@ -25,12 +25,13 @@ each:
 
 ## Ship pipeline
 
-A four-stage build pipeline under `opencode/agent` and `opencode/command`, chained by the `/ship` command. Each stage hands off to the next through a shared `.pipeline/` folder.
+A five-stage build pipeline under `opencode/agent` and `opencode/command`, chained by the `/ship` command. Each stage hands off to the next through a shared `.pipeline/` folder. Artifacts are organized in per-feature subfolders: `.pipeline/<YYYY-MM-DD>-<feature-slug>/` (e.g. `.pipeline/2026-09-24-add-dark-mode/`). Multiple runs in a day remain separate; same-day reruns overwrite only their own subfolder.
 
-- **planner** (opus) — turns a feature request into a detailed spec: exact file paths, function signatures, and edge cases → `.pipeline/spec.md`
-- **coder** (sonnet) — implements exactly what the spec says → `.pipeline/changes.md`
-- **tester** (sonnet) — writes and runs tests for the spec's edge cases and happy path, no redundant tests → `.pipeline/tests.md`
-- **reviewer** (opus-fast, read-only) — reads spec, changes, and diff and returns a PASS/FAIL verdict → `.pipeline/review.md`
+- **planner** (opus) — turns a feature request into a detailed spec: exact file paths, function signatures, and edge cases → `.pipeline/<YYYY-MM-DD>-<slug>/spec.md`
+- **coder** (sonnet) — implements exactly what the spec says → `.pipeline/<YYYY-MM-DD>-<slug>/changes.md`
+- **tester** (sonnet) — writes and runs tests for the spec's edge cases and happy path, no redundant tests → `.pipeline/<YYYY-MM-DD>-<slug>/tests.md`
+- **reviewer** (opus-fast, read-only) — reads spec, changes, and diff and returns a PASS/FAIL verdict → `.pipeline/<YYYY-MM-DD>-<slug>/review.md`
+- **pr-writer** (haiku) — creates branch, commits changes, pushes to origin, and opens a draft PR → `.pipeline/<YYYY-MM-DD>-<slug>/pr.md`
 - **ship** (haiku) — orchestrator that chains the stages and auto-loops once on a FAIL verdict
 
 Install by copying `opencode/agent` and `opencode/command` into `~/.config/opencode`, then run `/ship <feature request>`.

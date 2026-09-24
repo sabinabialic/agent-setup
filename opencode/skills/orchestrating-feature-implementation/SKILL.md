@@ -59,7 +59,7 @@ to the user for a decision before proceeding. If the planner's chosen interpreta
 is sound and demonstrably unaffected by the uncertainty, record the assumption
 and continue. Never silently accept an ambiguous spec.
 
-Reset `.pipeline/<feature-slug>/` (remove stale `spec.md`, `changes.md`, `tests.md`, `review.md`
+Reset `.pipeline/<YYYY-MM-DD>-<feature-slug>/` (remove stale `spec.md`, `changes.md`, `tests.md`, `review.md`
 from prior runs) before dispatching the planner. The slug matches the worklog filename (e.g., `add-dark-mode`), and the full path is `.pipeline/<YYYY-MM-DD>-<slug>/` to organize multiple features. Same-day reruns overwrite only their own subfolder; sibling features remain untouched.
 
 In `implementing`, delegate one implementation or fix task at a time, dispatching

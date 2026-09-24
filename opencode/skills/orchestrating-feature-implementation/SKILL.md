@@ -47,7 +47,7 @@ worklog. Reconcile their evidence in the worklog before entering `planned`.
 
 ## Planning And Edits
 
-In `planned`, dispatch the `planner` subagent (read-only, writes `.pipeline/spec.md`).
+In `planned`, dispatch the `planner` subagent (read-only, writes `.pipeline/<YYYY-MM-DD>-<feature-slug>/spec.md`).
 Pass the feature brief, any discovery findings, and acceptance criteria. The
 planner explores the codebase, designs the change, enumerates edge cases, and
 produces a specification with exact file paths, function signatures, and data flow.
@@ -59,11 +59,11 @@ to the user for a decision before proceeding. If the planner's chosen interpreta
 is sound and demonstrably unaffected by the uncertainty, record the assumption
 and continue. Never silently accept an ambiguous spec.
 
-Reset `.pipeline/` (remove stale `spec.md`, `changes.md`, `tests.md`, `review.md`
-from prior runs) before dispatching the planner.
+Reset `.pipeline/<feature-slug>/` (remove stale `spec.md`, `changes.md`, `tests.md`, `review.md`
+from prior runs) before dispatching the planner. The slug matches the worklog filename (e.g., `add-dark-mode`), and the full path is `.pipeline/<YYYY-MM-DD>-<slug>/` to organize multiple features. Same-day reruns overwrite only their own subfolder; sibling features remain untouched.
 
 In `implementing`, delegate one implementation or fix task at a time, dispatching
-the `coder` subagent (reads `.pipeline/spec.md`, writes `.pipeline/changes.md`).
+the `coder` subagent (reads `.pipeline/<YYYY-MM-DD>-<feature-slug>/spec.md`, writes `.pipeline/<YYYY-MM-DD>-<feature-slug>/changes.md`).
 Instruct it to implement only the assigned slice of the spec. Serial execution
 is the default. Parallel edits are allowed only when the conductor explicitly
 assigns disjoint files and the agents cannot affect shared interfaces or generated
@@ -78,18 +78,18 @@ continues. Inspection alone does not clear the finding.
 
 ## Testing, Review, And Iteration
 
-In `testing`, dispatch the `tester` subagent (reads `.pipeline/spec.md` and
-`.pipeline/changes.md`, writes `.pipeline/tests.md`). It discovers the project's
+In `testing`, dispatch the `tester` subagent (reads `.pipeline/<YYYY-MM-DD>-<feature-slug>/spec.md` and
+`.pipeline/<YYYY-MM-DD>-<feature-slug>/changes.md`, writes `.pipeline/<YYYY-MM-DD>-<feature-slug>/tests.md`). It discovers the project's
 test framework and conventions, then writes tests covering the happy path and all
 edge cases enumerated in the spec. The tester runs tests and reports exact commands,
 results, and failures. Tester agents do not silently repair production code; a
 failed test remains evidence and becomes an explicit fix task.
 
 In `reviewing`, dispatch the `reviewer` subagent (read-only, returns a PASS/FAIL
-verdict). It reads `.pipeline/spec.md`, `.pipeline/changes.md`, and `.pipeline/tests.md`,
+verdict). It reads `.pipeline/<YYYY-MM-DD>-<feature-slug>/spec.md`, `.pipeline/<YYYY-MM-DD>-<feature-slug>/changes.md`, and `.pipeline/<YYYY-MM-DD>-<feature-slug>/tests.md`,
 inspects the actual source changes, and judges spec conformance, correctness,
 security, reliability, maintainability, and edge-case coverage. The conductor
-captures the reviewer's verdict text verbatim and writes it to `.pipeline/review.md`,
+captures the reviewer's verdict text verbatim and writes it to `.pipeline/<YYYY-MM-DD>-<feature-slug>/review.md`,
 then records findings (severity, evidence, triggering scenario, recommendation) in
 the worklog's Review Findings section. Preserve all findings, including dismissed
 ones, with their disposition.
@@ -109,8 +109,8 @@ Enter `complete` only after fresh command-level verification following the last
 change. Run the narrowest relevant checks during iteration and the project's
 final test, lint, type-check, or build commands when available. Record exact
 commands, outcomes, and run context in the worklog. Completion verification must
-reference the `.pipeline/spec.md`, `.pipeline/changes.md`, `.pipeline/tests.md`,
-and `.pipeline/review.md` artifacts as evidence. Report unverified areas,
+reference the `.pipeline/<YYYY-MM-DD>-<feature-slug>/spec.md`, `.pipeline/<YYYY-MM-DD>-<feature-slug>/changes.md`, `.pipeline/<YYYY-MM-DD>-<feature-slug>/tests.md`,
+and `.pipeline/<YYYY-MM-DD>-<feature-slug>/review.md` artifacts as evidence. Report unverified areas,
 remaining risks, unresolved questions, and changed files explicitly. A report
 that merely says "tests pass" is not verification.
 

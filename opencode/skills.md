@@ -134,5 +134,5 @@ evolving shared plan.
 
 **Relation to `/ship`.** This skill is the flexible, adaptive, auditable option.
 The `/ship` pipeline is the rigid, push-button alternative — same
-plan→code→test→review shape, but fixed models, a flat `.pipeline/` handoff, and a
+plan→code→test→review shape, but fixed models, per-feature `.pipeline/<YYYY-MM-DD>-<slug>/` subfolders, and a
 one-retry cap instead of worklogs and phase bookkeeping.

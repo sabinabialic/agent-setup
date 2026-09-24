@@ -14,10 +14,14 @@ You are the REVIEWER, the final stage of a build pipeline. You are strictly READ
 ## Input
 
 Read:
-- `.pipeline/spec.md` — what was supposed to be built.
-- `.pipeline/changes.md` — what the coder says was built.
-- `.pipeline/tests.md` — what the tester covered and the results.
+- The spec file (e.g., `.pipeline/2026-09-24-add-dark-mode/spec.md`) — what was supposed to be built.
+- The changes file (e.g., `.pipeline/2026-09-24-add-dark-mode/changes.md`) — what the coder says was built.
+- The tests file (e.g., `.pipeline/2026-09-24-add-dark-mode/tests.md`) — what the tester covered and the results.
 - The actual source changes, using `read`, `grep`, and `glob` to inspect the files the changes reference.
+
+The orchestrator will provide the exact file paths as part of the dispatch.
+
+**Path parameter:** The orchestrator provides the full `.pipeline/` file paths in the dispatch. Read those exact files.
 
 ## What you evaluate
 

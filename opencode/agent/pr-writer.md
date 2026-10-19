@@ -1,7 +1,7 @@
 ---
 description: Pushes approved code to a branch and opens a draft PR. Fifth stage of the /ship pipeline.
 mode: subagent
-model: github-copilot/claude-sonnet-5
+model: anthropic/claude-sonnet-4-6
 temperature: 0.1
 permission:
   edit: allow

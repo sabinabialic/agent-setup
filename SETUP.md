@@ -1,7 +1,8 @@
 # Setup — replicating this environment on a new machine
 
-Reproduces my full opencode setup: model routing, skills, the `/ship`
-pipeline, workflow instructions, and the GitHub MCP connector.
+Reproduces the full opencode setup: direct Anthropic model routing, skills, the
+`/ship` pipeline, workflow instructions, and the GitHub MCP connector. It does
+not use GitHub Copilot.
 
 ## 1. Prerequisites
 
@@ -31,9 +32,8 @@ This installs:
 
 ## 3. Install plugin dependencies
 
-`opencode.jsonc` declares three plugins that opencode fetches on startup:
+`opencode.jsonc` declares two plugins that opencode fetches on startup:
 
-- `@hashicorp/opencode-bob-gateway-plugin` — IBM/HashiCorp model gateway
 - `superpowers` (from GitHub) — skills framework
 - `opencode-firecrawl` — web fetch/crawl
 
@@ -42,18 +42,21 @@ network access to npm and GitHub.
 
 ## 4. Authenticate model providers
 
-```sh
-opencode auth login
-```
+Start opencode and use `/connect`. Connect **Anthropic** with an
+enterprise-approved Anthropic API key or authentication method. The configured
+pipeline uses Anthropic models. You may also connect **OpenAI** with an
+enterprise-approved OpenAI API key or authentication method for interactive
+sessions or a future routing change.
 
-Authenticate **github-copilot** (this is how Claude + GPT models are
-reached). The `ibm-bob` gateway comes from the HashiCorp plugin and uses
-company SSO/credentials.
+An Anthropic Claude Enterprise or ChatGPT Enterprise chat subscription does not
+automatically provide API access. Ask the relevant enterprise administrator for
+an approved OpenCode authentication path, API key, or gateway. Do not select or
+authenticate GitHub Copilot.
 
 Confirm available models:
 
 ```sh
-opencode models | grep -E 'github-copilot|ibm-bob'
+opencode models | grep -E 'anthropic|openai'
 ```
 
 ## 5. GitHub MCP connector — create and export the PAT
@@ -97,7 +100,7 @@ The config uses this `github` block (already in `opencode/opencode.jsonc`):
   "type": "local",
   "command": ["npx", "-y", "@modelcontextprotocol/server-github"],
   "enabled": true,
-  "environment": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_MCP_PAT}" }
+  "environment": { "GITHUB_PERSONAL_ACCESS_TOKEN": "{env:GITHUB_MCP_PAT}" }
 }
 ```
 
@@ -114,7 +117,7 @@ Desktop **running**, swap the `command`/`environment` for:
     "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
     "ghcr.io/github/github-mcp-server"],
   "enabled": true,
-  "environment": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_MCP_PAT}" }
+  "environment": { "GITHUB_PERSONAL_ACCESS_TOKEN": "{env:GITHUB_MCP_PAT}" }
 }
 ```
 
@@ -138,10 +141,11 @@ Sanity checks:
 
 | Agent    | Model                              | Why                          |
 |----------|------------------------------------|------------------------------|
-| planner  | `github-copilot/claude-opus-4.8`   | Deep reasoning               |
-| reviewer | `github-copilot/claude-opus-4.8-fast` | Judgment, lower latency   |
-| coder    | `github-copilot/claude-sonnet-5` | Mechanical implementation    |
-| tester   | `github-copilot/claude-sonnet-5` | Structured, bounded          |
-| ship     | `github-copilot/claude-haiku-4.5`  | Pure coordination            |
-| (default)| `github-copilot/claude-sonnet-5` | Interactive default          |
-| (small)  | `github-copilot/claude-haiku-4.5`  | Titles, summaries, compaction |
+| planner  | `anthropic/claude-opus-4-6` | Deep reasoning               |
+| reviewer | `anthropic/claude-opus-4-6` | Independent final judgment   |
+| coder    | `anthropic/claude-sonnet-4-6` | Mechanical implementation  |
+| tester   | `anthropic/claude-sonnet-4-6` | Structured, bounded        |
+| pr-writer| `anthropic/claude-sonnet-4-6` | PR mechanics and description |
+| ship     | `anthropic/claude-haiku-4-5` | Pure coordination            |
+| (default)| `anthropic/claude-sonnet-4-6` | Interactive default         |
+| (small)  | `anthropic/claude-haiku-4-5` | Titles, summaries, compaction |

@@ -1,7 +1,7 @@
 ---
 description: Turns a feature request into a detailed, unambiguous implementation spec with exact file paths, function signatures, and edge cases. First stage of the /ship pipeline.
 mode: subagent
-model: github-copilot/claude-opus-4.8
+model: anthropic/claude-opus-4-6
 temperature: 0.1
 permission:
   edit: allow

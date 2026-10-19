@@ -1,0 +1,30 @@
+---
+description: Global engineering workflow, scope control, and PR synchronization.
+alwaysApply: true
+---
+
+# Engineering Workflow
+
+Choose the workflow by the work, not by habit.
+
+- Use `/ship` for a bounded, well-understood change that can be fully specified
+  up front and run without user interaction.
+- Use Plan Mode and a durable `docs/worklogs/<feature-slug>.md` for a large or
+  ambiguous feature, cross-cutting change, or work that needs decisions at phase
+  gates. Record `intake -> discovery -> planned -> implementing -> testing ->
+  reviewing -> iterating -> complete`, including transitions, evidence, and
+  unresolved questions.
+- A written plan can be executed directly, but it does not replace discovery
+  when requirements or repository behavior remain uncertain.
+
+Treat ambiguity that affects implementation as blocking. Ask for a decision or
+record a clearly bounded assumption before proceeding; do not invent behavior.
+
+Inspect the repository before editing. Keep changes focused, follow established
+conventions, and do not revert unrelated worktree changes. Test the changed
+behavior and run the narrowest relevant verification after the final edit.
+
+Before pushing, check whether the current branch has an open PR. After every
+push to an open PR, refresh its description from the current diff, including
+the implementation summary, review order, and actual test commands. Never
+force-push a shared branch.

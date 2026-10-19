@@ -2,7 +2,9 @@
 
 A collection of tools and skills that I use in my development process.
 
-To replicate this whole setup on a new machine, follow [SETUP.md](SETUP.md).
+To replicate the OpenCode setup on a new machine, follow [SETUP.md](SETUP.md).
+For the equivalent Cursor setup without GitHub Copilot, follow
+[CURSOR_SETUP.md](CURSOR_SETUP.md).
 
 ## Skills
 

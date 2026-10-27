@@ -4,7 +4,8 @@ A collection of tools and skills that I use in my development process.
 
 To replicate the OpenCode setup on a new machine, follow [SETUP.md](SETUP.md).
 For the equivalent Cursor setup without GitHub Copilot, follow
-[CURSOR_SETUP.md](CURSOR_SETUP.md).
+[CURSOR_SETUP.md](CURSOR_SETUP.md). For Claude Code, follow
+[CLAUDE_SETUP.md](CLAUDE_SETUP.md).
 
 ## Skills
 
@@ -37,6 +38,8 @@ A five-stage build pipeline under `opencode/agent` and `opencode/command`, chain
 - **ship** (haiku) — orchestrator that chains the stages and auto-loops once on a FAIL verdict
 
 Install by copying `opencode/agent` and `opencode/command` into `~/.config/opencode`, then run `/ship <feature request>`.
+
+For Claude Code, the stages live in `claude/agents` and the orchestrator in `claude/commands/ship.md`, since Claude Code subagents cannot dispatch other subagents. Copy `claude/` into `~/.claude` (see [CLAUDE_SETUP.md](CLAUDE_SETUP.md)).
 
 ## Choosing a workflow
 

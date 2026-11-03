@@ -107,7 +107,7 @@ start_run "Out of scope stray file"
 fix_empty_name
 echo "scratch" > "$WT/notes.txt"
 expect 3 "scope flags the unlisted file" "$GATE" scope "$RUN" code
-contains '`notes.txt` | prod | +1/-0 | NO'
+contains '`notes.txt` | doc | +1/-0 | NO'
 "$GATE" verify "$RUN" >/dev/null; approve 2>/dev/null
 expect 3 "gate refuses out-of-scope paths" "$GATE" gate "$RUN"
 contains "out of scope: notes.txt"
@@ -144,9 +144,9 @@ section "5. size threshold warns but does not block"
 start_run "Add six greeting variants"
 printf 'src/*.sh  # variants\ntests/greet_test.sh  # regression test\n' > "$RUN/allowed-files.txt"
 for i in 1 2 3 4 5 6; do printf 'v%s() { echo %s; }\n' "$i" "$i" > "$WT/src/v$i.sh"; done
-expect 0 "scope warns at 6 production files and still exits 0" "$GATE" scope "$RUN" code
+expect 0 "scope warns at 6 code files and still exits 0" "$GATE" scope "$RUN" code
 contains "WARN size"
-SHIP_WARN_PROD_FILES=10 "$GATE" scope "$RUN" code | grep -q "WARN size" && failc "threshold override ignored" || pass "SHIP_WARN_PROD_FILES=10 removes the warning"
+SHIP_WARN_CODE_FILES=10 "$GATE" scope "$RUN" code | grep -q "WARN size" && failc "threshold override ignored" || pass "SHIP_WARN_CODE_FILES=10 removes the warning"
 "$GATE" verify "$RUN" >/dev/null; approve
 expect 0 "gate passes with a size warning line" "$GATE" gate "$RUN"
 contains "warn size over threshold"
@@ -181,6 +181,37 @@ fix_empty_name
 git -C "$WT" add -A && git -C "$WT" commit -q -m sneaky
 expect 3 "gate refuses a worktree whose HEAD moved" "$GATE" gate "$RUN"
 contains "worktree HEAD moved off base"
+
+section "10. docs, config, and test data do not count toward the size warning"
+start_run "Docs and config only change"
+printf 'README.md  # docs\ndocs/*  # docs\nconfig/*  # config\npackage-lock.json  # lockfile\ntests/*  # fixtures\n' > "$RUN/allowed-files.txt"
+mkdir -p "$WT/docs" "$WT/config"
+seq 1 500 | sed 's/^/line /' >> "$WT/README.md"
+for i in 1 2 3 4 5 6; do seq 1 100 > "$WT/docs/page$i.md"; done
+seq 1 200 | sed 's/^/k$: v/' > "$WT/config/app.yaml"
+printf '{"lockfileVersion": 3}\n' > "$WT/package-lock.json"
+seq 1 450 | sed 's/^/{"n": /; s/$/}/' > "$WT/tests/data.json"
+expect 0 "scope stays quiet with 9 docs/config files and 1300+ non-code lines" "$GATE" scope "$RUN" code
+contains "Code: 0 files, 0 lines (counted toward the size warning)"
+contains "Docs and config: 9 files, 1301 lines"
+contains '`tests/data.json` | test | +450/-0 | yes'
+contains '`config/app.yaml` | config | +200/-0 | yes'
+case "$LAST_OUT" in *"WARN size"*) failc "docs/config triggered the size warning" ;; *) pass "no size warning for docs and config" ;; esac
+"$GATE" metrics "$RUN" test >/dev/null
+grep -q '"code_lines": 0' "$RUN/metrics.json" && grep -q '"doc_config_lines": 1301' "$RUN/metrics.json" &&
+  pass "metrics separate code lines from docs/config lines" || failc "metrics do not separate code from docs/config"
+
+section "11. code-line threshold: 350 lines is quiet, 401 lines warns"
+start_run "Large single file change"
+printf 'src/*  # code\n' > "$RUN/allowed-files.txt"
+seq 1 350 | sed 's/^/echo /' > "$WT/src/big.sh"
+expect 0 "350 code lines (under 400)" "$GATE" scope "$RUN" code
+contains "Code: 1 files, 350 lines"
+case "$LAST_OUT" in *"WARN size"*) failc "350 lines warned" ;; *) pass "no size warning at 350 code lines" ;; esac
+seq 1 401 | sed 's/^/echo /' > "$WT/src/big.sh"
+expect 0 "401 code lines warns but still exits 0" "$GATE" scope "$RUN" code
+contains "WARN size: over 5 code files or 400 code lines"
+SHIP_WARN_CODE_LINES=500 "$GATE" scope "$RUN" code | grep -q "WARN size" && failc "line override ignored" || pass "SHIP_WARN_CODE_LINES=500 removes the warning"
 
 section "runs.tsv"
 sed 's/^/    | /' "$REPO/.pipeline/runs.tsv"

@@ -22,7 +22,7 @@ The request, `RUN`, and `WT`, a clean checkout of the PR base. Explore in `WT`, 
 - **Allowed files**: expected production and test paths, each with a reason.
 - **Non-goals**: adjacent work to leave alone.
 - **Validation**: existing checks to run, plus regression coverage that is actually missing.
-- **Size estimate**: production and test files, and approximate changed lines.
+- **Size estimate**: code, test, and docs/config files, and approximate changed lines for each. Only code counts toward the size warning.
 - **Assumptions**: harmless assumptions you made, if any.
 
 `$RUN/allowed-files.txt`: the Allowed files section in machine form, one path or narrow glob per line, followed by `  # reason`.

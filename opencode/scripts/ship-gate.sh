@@ -27,9 +27,12 @@
 set -u
 
 # Tunables. Override with environment variables of the same name.
-SHIP_WARN_PROD_FILES="${SHIP_WARN_PROD_FILES:-5}"
-SHIP_WARN_PROD_LINES="${SHIP_WARN_PROD_LINES:-300}"
+# Only code files count toward the size warning; tests, docs, and config don't.
+SHIP_WARN_CODE_FILES="${SHIP_WARN_CODE_FILES:-5}"
+SHIP_WARN_CODE_LINES="${SHIP_WARN_CODE_LINES:-400}"
 SHIP_TEST_REGEX="${SHIP_TEST_REGEX:-(^|/)(tests?|__tests__|specs?|testdata|fixtures)/|(^|/)test_[^/]*$|[._-](test|spec)s?\.[^/]+$}"
+SHIP_DOC_REGEX="${SHIP_DOC_REGEX:-(^|/)docs?/|\.(md|mdx|markdown|rst|adoc|txt)$|(^|/)(LICENSE|CHANGELOG|AUTHORS|NOTICE)[^/]*$}"
+SHIP_CONFIG_REGEX="${SHIP_CONFIG_REGEX:-\.(json|jsonc|ya?ml|toml|ini|cfg|conf|lock|csv|tsv|xml|env)$|(^|/)(go\.sum|\.gitignore|\.gitattributes|\.editorconfig)$}"
 # Space-separated paths ignored by the dirty-checkout check, in addition to .pipeline.
 SHIP_DIRTY_EXCLUDE="${SHIP_DIRTY_EXCLUDE:-}"
 
@@ -83,7 +86,13 @@ staged_diff() {
 
 live_hash() { candidate_diff --binary --full-index | sha256; }
 
-is_test() { [[ "$1" =~ $SHIP_TEST_REGEX ]]; }
+# Tests win over docs and config, so fixtures such as tests/data.json count as tests.
+file_kind() {
+  if [[ "$1" =~ $SHIP_TEST_REGEX ]]; then echo test
+  elif [[ "$1" =~ $SHIP_DOC_REGEX ]]; then echo doc
+  elif [[ "$1" =~ $SHIP_CONFIG_REGEX ]]; then echo config
+  else echo code; fi
+}
 
 allowed() {
   local f="$1" line pat
@@ -99,13 +108,13 @@ allowed() {
 }
 
 # Writes candidate.patch, candidate.sha256, files.tsv, scope.md.
-# Sets PROD_FILES PROD_LINES TEST_FILES TEST_LINES UNEXPECTED SIZE_WARN.
+# Sets CODE_FILES CODE_LINES TEST_FILES TEST_LINES OTHER_FILES OTHER_LINES UNEXPECTED SIZE_WARN.
 snapshot() {
   local stage="$1"
   candidate_diff --binary --full-index > "$RUN/candidate.patch" || die "could not build candidate diff"
   sha256 < "$RUN/candidate.patch" > "$RUN/candidate.sha256"
   HASH="$(cat "$RUN/candidate.sha256")"
-  PROD_FILES=0; PROD_LINES=0; TEST_FILES=0; TEST_LINES=0; UNEXPECTED=0; SIZE_WARN=0
+  CODE_FILES=0; CODE_LINES=0; TEST_FILES=0; TEST_LINES=0; OTHER_FILES=0; OTHER_LINES=0; UNEXPECTED=0; SIZE_WARN=0
   : > "$RUN/files.tsv"
   local add del path kind ok lines rows=""
   while IFS="$(printf '\t')" read -r add del path; do
@@ -113,14 +122,18 @@ snapshot() {
     [ "$add" = "-" ] && add=0
     [ "$del" = "-" ] && del=0
     lines=$((add + del))
-    if is_test "$path"; then kind="test"; TEST_FILES=$((TEST_FILES+1)); TEST_LINES=$((TEST_LINES+lines))
-    else kind="prod"; PROD_FILES=$((PROD_FILES+1)); PROD_LINES=$((PROD_LINES+lines)); fi
+    kind="$(file_kind "$path")"
+    case "$kind" in
+      code) CODE_FILES=$((CODE_FILES+1)); CODE_LINES=$((CODE_LINES+lines)) ;;
+      test) TEST_FILES=$((TEST_FILES+1)); TEST_LINES=$((TEST_LINES+lines)) ;;
+      *) OTHER_FILES=$((OTHER_FILES+1)); OTHER_LINES=$((OTHER_LINES+lines)) ;;
+    esac
     if allowed "$path"; then ok=yes; else ok=NO; UNEXPECTED=$((UNEXPECTED+1)); echo "$path" >> "$RUN/unexpected-seen.txt"; fi
     printf '%s\t%s\t%s\t%s\t%s\n' "$kind" "$add" "$del" "$ok" "$path" >> "$RUN/files.tsv"
     rows="$rows| \`$path\` | $kind | +$add/-$del | $ok |
 "
   done < <(candidate_diff --numstat)
-  if [ "$PROD_FILES" -gt "$SHIP_WARN_PROD_FILES" ] || [ "$PROD_LINES" -gt "$SHIP_WARN_PROD_LINES" ]; then SIZE_WARN=1; fi
+  if [ "$CODE_FILES" -gt "$SHIP_WARN_CODE_FILES" ] || [ "$CODE_LINES" -gt "$SHIP_WARN_CODE_LINES" ]; then SIZE_WARN=1; fi
   {
     echo "# Scope ($stage)"
     echo
@@ -130,8 +143,8 @@ snapshot() {
     echo "|---|---|---|---|"
     printf '%s' "$rows"
     echo
-    echo "Production: $PROD_FILES files, $PROD_LINES lines. Tests: $TEST_FILES files, $TEST_LINES lines."
-    [ "$SIZE_WARN" = 1 ] && echo "WARN size: over $SHIP_WARN_PROD_FILES production files or $SHIP_WARN_PROD_LINES production lines. Needs a Size explanation in changes.md and a scope check in review."
+    echo "Code: $CODE_FILES files, $CODE_LINES lines (counted toward the size warning). Tests: $TEST_FILES files, $TEST_LINES lines. Docs and config: $OTHER_FILES files, $OTHER_LINES lines."
+    [ "$SIZE_WARN" = 1 ] && echo "WARN size: over $SHIP_WARN_CODE_FILES code files or $SHIP_WARN_CODE_LINES code lines. Needs a Size explanation in changes.md and a scope check in review."
     [ "$UNEXPECTED" -gt 0 ] && echo "FAIL scope: $UNEXPECTED file(s) not in allowed-files.txt."
   } > "$RUN/scope.md"
 }
@@ -318,7 +331,7 @@ run_gates() {
 
   [ "$UNEXPECTED" -eq 0 ] && ok "all changed paths are in allowed-files.txt" ||
     bad "out of scope: $(awk -F'\t' '$4=="NO"{printf "%s ", $5}' "$RUN/files.tsv")"
-  [ "$SIZE_WARN" = 1 ] && echo "warn size over threshold ($PROD_FILES prod files, $PROD_LINES prod lines); review must have accepted the explanation"
+  [ "$SIZE_WARN" = 1 ] && echo "warn size over threshold ($CODE_FILES code files, $CODE_LINES code lines); review must have accepted the explanation"
 
   if [ ! -f "$RUN/checks.tsv" ]; then bad "checks never ran (no checks.tsv)"
   else
@@ -399,9 +412,11 @@ cmd_publish() {
 cmd_metrics() {
   load_run "${1:-}"; local outcome="${2:-unknown}"
   [ -f "$RUN/files.tsv" ] || : > "$RUN/files.tsv"
-  local pf pl tf tl unexp_final unexp_seen retries warns verdict runtime
-  pf="$(awk -F'\t' '$1=="prod"' "$RUN/files.tsv" | wc -l | tr -d ' ')"
-  pl="$(awk -F'\t' '$1=="prod"{s+=$2+$3} END{print s+0}' "$RUN/files.tsv")"
+  local cf cl tf tl of ol unexp_final unexp_seen retries warns verdict runtime
+  cf="$(awk -F'\t' '$1=="code"' "$RUN/files.tsv" | wc -l | tr -d ' ')"
+  cl="$(awk -F'\t' '$1=="code"{s+=$2+$3} END{print s+0}' "$RUN/files.tsv")"
+  of="$(awk -F'\t' '$1=="doc"||$1=="config"' "$RUN/files.tsv" | wc -l | tr -d ' ')"
+  ol="$(awk -F'\t' '$1=="doc"||$1=="config"{s+=$2+$3} END{print s+0}' "$RUN/files.tsv")"
   tf="$(awk -F'\t' '$1=="test"' "$RUN/files.tsv" | wc -l | tr -d ' ')"
   tl="$(awk -F'\t' '$1=="test"{s+=$2+$3} END{print s+0}' "$RUN/files.tsv")"
   unexp_final="$(awk -F'\t' '$4=="NO"' "$RUN/files.tsv" | wc -l | tr -d ' ')"
@@ -417,19 +432,21 @@ cmd_metrics() {
   "verdict": "$verdict",
   "runtime_seconds": $runtime,
   "retries": $retries,
-  "prod_files": $pf,
-  "prod_lines": $pl,
+  "code_files": $cf,
+  "code_lines": $cl,
   "test_files": $tf,
   "test_lines": $tl,
+  "doc_config_files": $of,
+  "doc_config_lines": $ol,
   "unexpected_files_final": $unexp_final,
   "unexpected_files_seen": $unexp_seen,
   "size_warnings": $warns
 }
 EOF
   local log="$ROOT/.pipeline/runs.tsv"
-  [ -f "$log" ] || printf 'date\trun\toutcome\tverdict\truntime_s\tretries\tprod_files\tprod_lines\ttest_files\ttest_lines\tunexpected_seen\tsize_warnings\n' > "$log"
-  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$(date +%Y-%m-%dT%H:%M:%S)" "$(basename "$RUN")" "$outcome" "$verdict" \
-    "$runtime" "$retries" "$pf" "$pl" "$tf" "$tl" "$unexp_seen" "$warns" >> "$log"
+  [ -f "$log" ] || printf 'date\trun\toutcome\tverdict\truntime_s\tretries\tcode_files\tcode_lines\ttest_files\ttest_lines\tdoc_config_files\tdoc_config_lines\tunexpected_seen\tsize_warnings\n' > "$log"
+  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$(date +%Y-%m-%dT%H:%M:%S)" "$(basename "$RUN")" "$outcome" "$verdict" \
+    "$runtime" "$retries" "$cf" "$cl" "$tf" "$tl" "$of" "$ol" "$unexp_seen" "$warns" >> "$log"
   cat "$RUN/metrics.json"
 }
 

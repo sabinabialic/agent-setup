@@ -47,15 +47,15 @@ The sequence is: isolate → short plan → code and tests → independent verif
 What the script enforces:
 
 - **Isolation.** `init` stops if the checkout has uncommitted changes. It fetches the base (the default branch, or `--base <branch>` when the work builds on an existing branch), records its commit, and creates the branch and worktree there. Nothing is stashed automatically.
-- **Scope.** After every editing stage, `scope` lists every changed path, including new untracked files, and checks it against `allowed-files.txt`. More than 5 production files or 300 changed production lines prints a warning. The coder must explain the size and the reviewer judges it; the warning never fails the run.
+- **Scope.** After every editing stage, `scope` lists every changed path, including new untracked files, and checks it against `allowed-files.txt`. More than 5 code files or 400 changed code lines prints a warning. Only code counts toward these limits: tests, docs (`*.md`, `docs/`, and similar), and config or data files (JSON, YAML, TOML, lockfiles, and similar) are reported separately. The coder must explain the size and the reviewer judges it; the warning never fails the run.
 - **Checks tied to the candidate.** `verify` runs `checks.txt` in the worktree and records each exit status against the candidate patch's SHA-256. Skipped checks must have a reason. A check that creates files fails verification.
 - **Publication.** `gate` and `publish` require: every path in scope, required checks passed on this exact candidate, and a recorded `VERDICT: PASS` for this exact candidate. `publish` stages the explicit file list instead of using `git add -A`, and confirms that both the staged patch and the commit hash to the reviewed candidate before it pushes.
 
 A FAIL verdict gets one repair round. Each blocking issue is tagged with its owner, and only that owner is re-dispatched: production defects go to the coder, defective tests to the tester, and scope problems to the planner.
 
-Each run writes `metrics.json` (production and test lines and files, unexpected files, retries, size warnings, runtime, outcome) and appends a row to `.pipeline/runs.tsv` so runs can be compared.
+Each run writes `metrics.json` (code, test, and docs/config lines and files, unexpected files, retries, size warnings, runtime, outcome) and appends a row to `.pipeline/runs.tsv` so runs can be compared.
 
-Thresholds and the test-file pattern can be tuned with environment variables: `SHIP_WARN_PROD_FILES`, `SHIP_WARN_PROD_LINES`, `SHIP_TEST_REGEX`, and `SHIP_DIRTY_EXCLUDE`. The defaults are at the top of the script.
+Thresholds and file classification can be tuned with environment variables: `SHIP_WARN_CODE_FILES`, `SHIP_WARN_CODE_LINES`, `SHIP_TEST_REGEX`, `SHIP_DOC_REGEX`, `SHIP_CONFIG_REGEX`, and `SHIP_DIRTY_EXCLUDE`. A file that matches the test pattern counts as a test even if it is JSON or Markdown. The defaults are at the top of the script.
 
 Install for OpenCode by copying `opencode/` into `~/.config/opencode` (see [SETUP.md](SETUP.md)). For Claude Code, the stages live in `claude/agents` and the orchestrator in `claude/commands/ship.md`, because Claude Code subagents cannot dispatch other subagents; copy `claude/` into `~/.claude` (see [CLAUDE_SETUP.md](CLAUDE_SETUP.md)). The Cursor command runs every stage in one agent and uses `.cursor/scripts/ship-gate.sh` (see [CURSOR_SETUP.md](CURSOR_SETUP.md)).
 

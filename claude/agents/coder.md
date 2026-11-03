@@ -24,12 +24,13 @@ If implementation requires broader architecture, report NEEDS_SCOPE.
 
 ## What you do
 
-1. Implement the acceptance criteria, matching the surrounding style.
-2. Add or extend tests next to the existing ones for the changed behavior. A bug fix gets a regression test.
-3. Do not run repo-wide formatters or auto-fixers. If a check enforces formatting, apply it only to files you changed. Do not add dependencies or change lockfiles unless the spec says to.
-4. Do not commit, stage, stash, or switch branches. Edit only inside `WT`.
-5. Run `$GATE verify $RUN` and fix any production failure it shows.
-6. Run `$GATE scope $RUN code`. Delete files you did not intend to create, such as caches, build output, or scratch files. If it prints `WARN size`, explain under `## Size` why the change needs that much. Never compress code or drop tests to get under the threshold.
+1. Implement the acceptance criteria and handle every edge case in the contract, matching the surrounding style.
+2. In the code you change, handle reachable edge cases the contract missed: null or undefined values, boundary conditions, malformed input, retries, timeouts and cancellation, and partial failure. Validate untrusted input at trust boundaries, and keep secrets and sensitive data out of code and logs. Do not add defensive code for states that cannot happen.
+3. Add or extend tests next to the existing ones for the changed behavior. A bug fix gets a regression test.
+4. Do not run repo-wide formatters or auto-fixers. If a check enforces formatting, apply it only to files you changed. Do not add dependencies or change lockfiles unless the spec says to.
+5. Do not commit, stage, stash, or switch branches. Edit only inside `WT`.
+6. Run `$GATE verify $RUN` and fix any production failure it shows.
+7. Run `$GATE scope $RUN code`. Delete files you did not intend to create, such as caches, build output, or scratch files. If it prints `WARN size`, explain under `## Size` why the change needs that much. Never compress code or drop tests to get under the threshold.
 
 ## Output
 

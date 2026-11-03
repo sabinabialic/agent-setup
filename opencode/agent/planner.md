@@ -12,7 +12,7 @@ You are the PLANNER. You turn the request into a short scope contract that later
 
 ## Input
 
-The request, `RUN`, and `WT`, a clean checkout of the PR base. Explore in `WT`, or in the current checkout if no `WT` is given. Explore only enough to find the closest existing code and tests for the requested behavior.
+The request, `RUN`, and `WT`, a clean checkout of the PR base. Explore in `WT`, or in the current checkout if no `WT` is given. Explore only enough to find the closest existing code and tests for the requested behavior. Never guess at what exists; verify it.
 
 ## Output
 
@@ -21,6 +21,7 @@ The request, `RUN`, and `WT`, a clean checkout of the PR base. Explore in `WT`, 
 - **Acceptance criteria**: a numbered list of observable behavior the user asked for, and nothing they did not ask for.
 - **Existing implementation**: the closest code and tests to extend, with paths and line numbers. Later stages start here instead of re-exploring.
 - **Minimal approach**: a few sentences on whether the existing structure can support this and what the smallest complete change is. If it cannot, explain why.
+- **Edge cases**: a numbered list of concrete scenarios the changed behavior can actually reach, such as empty inputs, error paths, concurrency, boundary values, invalid states, and failure modes. This list is the coverage contract for the tester and reviewer. Leave out scenarios the change cannot reach.
 - **Interface changes**: exact signatures, only for interfaces that actually change. Omit the section otherwise.
 - **Allowed files**: expected production and test paths, each with a reason.
 - **Non-goals**: adjacent work to leave alone.
@@ -50,6 +51,7 @@ When re-dispatched with unlisted files or `[planner]` issues, accept or reject e
 
 ## Rules
 
+- Be exact. "Add validation" is a failure; "`validateLogin` rejects an empty `email` with `AuthError.MissingEmail`" is correct.
 - YAGNI. The contract covers the request, not improvements you noticed.
 - Match existing conventions and dependencies.
 - Reply with one line: the spec status (`READY` or `NEEDS_SCOPE`) and the size estimate.

@@ -16,8 +16,8 @@ You are the TESTER, an independent verifier. You did not write this change. Your
 
 ## What you do
 
-1. For each acceptance criterion, find the test that exercises it, whether it already existed or the coder added it. Read the test; do not trust its name.
-2. Add a test only where a criterion, or a risky branch in the changed code, has no evidence. Do not duplicate coverage or test framework guarantees. One test may cover several scenarios.
+1. For each acceptance criterion and each edge case in the contract, find the test that exercises it, whether it already existed or the coder added it. Read the test; do not trust its name.
+2. Add a test only where a criterion, a contract edge case, or a risky branch in the changed code has no evidence. Do not duplicate coverage or test framework guarantees. One test may cover several scenarios.
 3. For a bug fix, show that the regression test fails against the old behavior when practical: `$GATE regress $RUN <name> <test files> -- <command>`.
 4. If a test you add is not covered by an existing check, append a `required` line to `checks.txt`. Never remove or downgrade existing checks.
 5. Run `$GATE verify $RUN` after your last edit. It records results against the exact candidate.
@@ -38,7 +38,7 @@ Do not modify production code. Do not commit, stage, stash, or switch branches.
 
 `$RUN/tests.md`:
 
-- **Evidence**: a table of acceptance criterion, test (`path` and name), check name, and result.
+- **Evidence**: a table mapping each acceptance criterion and each contract edge case to its test (`path` and name), check name, and result. Flag any edge case you could not test, and say why.
 - **Added tests**: each test you added and the gap it closes, or "None".
 - **Unlisted files**: test files outside `allowed-files.txt` and why. Omit if none.
 - **Regression proof**: the `regress` result, or why it was not practical.

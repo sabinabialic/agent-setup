@@ -35,7 +35,7 @@ The sequence is: isolate → short plan → code and tests → independent verif
 | Stage | Who (model) | Produces in `RUN` |
 |---|---|---|
 | Isolate | `ship-gate.sh init` | a `ship/<slug>` branch and a clean worktree (`WT`) from the PR base, plus `run.env` and `request.md` |
-| Plan | **planner** (opus) | `spec.md` (acceptance criteria, existing code to extend, minimal approach, allowed files, non-goals, validation, size estimate), `allowed-files.txt`, `checks.txt` |
+| Plan | **planner** (opus) | `spec.md` (acceptance criteria, existing code to extend, minimal approach, edge cases, allowed files, non-goals, validation, size estimate), `allowed-files.txt`, `checks.txt` |
 | Code | **coder** (sonnet) | the change and its focused regression tests in `WT`, plus `changes.md` |
 | Verify | **tester** (sonnet) | evidence for each acceptance criterion, tests that were missing, and `tests.md`; `ship-gate.sh verify` writes `checks.tsv` |
 | Review | **reviewer** (opus, read-only) | a verdict on the exact `candidate.patch`, which the orchestrator writes to `review.md` |

@@ -51,9 +51,10 @@ When in doubt between `/ship` and the orchestration skill, take the heavier one
 ## Single source of truth for standards
 
 Review standards live in the `pr-review` skill. The `/ship` reviewer agent
-applies the skill to the candidate patch and adds only ship-specific checks
-(acceptance criteria, scope, minimality); defer to `pr-review` rather than
-duplicating review criteria elsewhere.
+applies its full set of lenses (correctness, edge cases, security,
+concurrency/scalability, operational risk, maintainability) to the candidate
+patch on top of spec conformance, plus ship checks for acceptance criteria,
+scope, and minimality; defer to `pr-review` for the standard behind each lens.
 
 ## Keep PR descriptions in sync with pushes
 

@@ -66,10 +66,18 @@ approve() {
 echo "gate script: $GATE"
 echo "throwaway repo: $REPO"
 
-section "0. the three script copies are identical"
+section "0. shared files have not drifted"
 for copy in "$HERE/claude/scripts/ship-gate.sh" "$HERE/cursor/.cursor/scripts/ship-gate.sh"; do
   if cmp -s "$GATE" "$copy"; then pass "${copy#"$HERE"/} matches"; else failc "${copy#"$HERE"/} differs from opencode/scripts/ship-gate.sh"; fi
 done
+body() { awk 'BEGIN{c=0} c>=2{print; next} /^---$/{c++}' "$1"; }
+for a in planner coder tester reviewer pr-writer; do
+  if [ "$(body "$HERE/opencode/agent/$a.md")" = "$(body "$HERE/claude/agents/$a.md")" ]; then pass "$a agent text matches between opencode and claude"
+  else failc "$a agent text differs between opencode/agent and claude/agents"; fi
+done
+steps() { awk '/^## Sequence$/{p=1} p' "$1"; }
+[ "$(steps "$HERE/opencode/agent/ship.md")" = "$(steps "$HERE/claude/commands/ship.md")" ] &&
+  pass "orchestrator steps match between opencode and claude" || failc "orchestrator steps differ between opencode and claude"
 
 section "1. clean pass: isolate, scope, verify, regress, review, publish"
 expect 0 "init creates branch and worktree from origin/main" "$GATE" init -- "Default greeting for empty name"

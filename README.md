@@ -9,7 +9,7 @@ For the equivalent Cursor setup without GitHub Copilot, follow
 
 ## Skills
 
-opencode skills under `opencode/<name>/SKILL.md`, loaded automatically when a
+opencode skills under `opencode/skills/<name>/SKILL.md`, loaded automatically when a
 task matches their trigger. See [opencode/skills.md](opencode/skills.md) for details on
 each:
 
@@ -28,18 +28,44 @@ each:
 
 ## Ship pipeline
 
-A five-stage build pipeline under `opencode/agent` and `opencode/command`, chained by the `/ship` command. Each stage hands off to the next through a shared `.pipeline/` folder. Artifacts are organized in per-feature subfolders: `.pipeline/<YYYY-MM-DD>-<feature-slug>/` (e.g. `.pipeline/2026-09-24-add-dark-mode/`). Multiple runs in a day remain separate; same-day reruns overwrite only their own subfolder.
+`/ship <feature request>` takes a bounded change from request to draft PR. Agents do the judgment work. A small script, `ship-gate.sh`, handles git isolation, scope checks, check runs, and publication, so those steps don't depend on prompt wording.
 
-- **planner** (opus) — turns a feature request into a detailed spec: exact file paths, function signatures, and edge cases → `.pipeline/<YYYY-MM-DD>-<slug>/spec.md`
-- **coder** (sonnet) — implements exactly what the spec says → `.pipeline/<YYYY-MM-DD>-<slug>/changes.md`
-- **tester** (sonnet) — writes and runs tests for the spec's edge cases and happy path, no redundant tests → `.pipeline/<YYYY-MM-DD>-<slug>/tests.md`
-- **reviewer** (opus-fast, read-only) — reads spec, changes, and diff and returns a PASS/FAIL verdict → `.pipeline/<YYYY-MM-DD>-<slug>/review.md`
-- **pr-writer** (haiku) — creates branch, commits changes, pushes to origin, and opens a draft PR → `.pipeline/<YYYY-MM-DD>-<slug>/pr.md`
-- **ship** (haiku) — orchestrator that chains the stages and auto-loops once on a FAIL verdict
+The sequence is: isolate → short plan → code and tests → independent verification → review → scripted publication.
 
-Install by copying `opencode/agent` and `opencode/command` into `~/.config/opencode`, then run `/ship <feature request>`.
+| Stage | Who (model) | Produces in `RUN` |
+|---|---|---|
+| Isolate | `ship-gate.sh init` | a `ship/<slug>` branch and a clean worktree (`WT`) from the PR base, plus `run.env` and `request.md` |
+| Plan | **planner** (opus) | `spec.md` (acceptance criteria, existing code to extend, minimal approach, allowed files, non-goals, validation, size estimate), `allowed-files.txt`, `checks.txt` |
+| Code | **coder** (sonnet) | the change and its focused regression tests in `WT`, plus `changes.md` |
+| Verify | **tester** (sonnet) | evidence for each acceptance criterion, tests that were missing, and `tests.md`; `ship-gate.sh verify` writes `checks.tsv` |
+| Review | **reviewer** (opus, read-only) | a verdict on the exact `candidate.patch`, which the orchestrator writes to `review.md` |
+| Publish | **pr-writer** (sonnet), then `ship-gate.sh publish` | `pr-title.txt`, `commit-msg.txt`, and `pr-body.md`; the script then commits, pushes, opens the draft PR, and writes `pr.md` |
+| Orchestrate | **ship** (haiku) in OpenCode; the `/ship` command in Claude Code | — |
 
-For Claude Code, the stages live in `claude/agents` and the orchestrator in `claude/commands/ship.md`, since Claude Code subagents cannot dispatch other subagents. Copy `claude/` into `~/.claude` (see [CLAUDE_SETUP.md](CLAUDE_SETUP.md)).
+`RUN` is `.pipeline/<YYYY-MM-DD>-<slug>/`, and the worktree lives at `RUN/worktree`. A same-day rerun of the same request replaces only its own run folder. Add `.pipeline/` to each repository's `.gitignore`.
+
+What the script enforces:
+
+- **Isolation.** `init` stops if the checkout has uncommitted changes. It fetches the base (the default branch, or `--base <branch>` when the work builds on an existing branch), records its commit, and creates the branch and worktree there. Nothing is stashed automatically.
+- **Scope.** After every editing stage, `scope` lists every changed path, including new untracked files, and checks it against `allowed-files.txt`. More than 5 production files or 300 changed production lines prints a warning. The coder must explain the size and the reviewer judges it; the warning never fails the run.
+- **Checks tied to the candidate.** `verify` runs `checks.txt` in the worktree and records each exit status against the candidate patch's SHA-256. Skipped checks must have a reason. A check that creates files fails verification.
+- **Publication.** `gate` and `publish` require: every path in scope, required checks passed on this exact candidate, and a recorded `VERDICT: PASS` for this exact candidate. `publish` stages the explicit file list instead of using `git add -A`, and confirms that both the staged patch and the commit hash to the reviewed candidate before it pushes.
+
+A FAIL verdict gets one repair round. Each blocking issue is tagged with its owner, and only that owner is re-dispatched: production defects go to the coder, defective tests to the tester, and scope problems to the planner.
+
+Each run writes `metrics.json` (production and test lines and files, unexpected files, retries, size warnings, runtime, outcome) and appends a row to `.pipeline/runs.tsv` so runs can be compared.
+
+Thresholds and the test-file pattern can be tuned with environment variables: `SHIP_WARN_PROD_FILES`, `SHIP_WARN_PROD_LINES`, `SHIP_TEST_REGEX`, and `SHIP_DIRTY_EXCLUDE`. The defaults are at the top of the script.
+
+Install for OpenCode by copying `opencode/` into `~/.config/opencode` (see [SETUP.md](SETUP.md)). For Claude Code, the stages live in `claude/agents` and the orchestrator in `claude/commands/ship.md`, because Claude Code subagents cannot dispatch other subagents; copy `claude/` into `~/.claude` (see [CLAUDE_SETUP.md](CLAUDE_SETUP.md)). The Cursor command runs every stage in one agent and uses `.cursor/scripts/ship-gate.sh` (see [CURSOR_SETUP.md](CURSOR_SETUP.md)).
+
+The gate script has three identical copies: `opencode/scripts/`, `claude/scripts/`, and `cursor/.cursor/scripts/`. The shared agent text is also duplicated between `opencode/agent/` and `claude/agents/`. Edit the OpenCode copy, sync the others, and run:
+
+```sh
+bash tests/ship-gate.test.sh
+```
+
+The test fails if the copies drift, and it exercises the gates in a throwaway repository.
 
 ## Choosing a workflow
 

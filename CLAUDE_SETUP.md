@@ -9,7 +9,7 @@ Claude Code configuration, so they are available in every repository.
 - [Claude Code](https://claude.com/claude-code) (CLI or the Code tab of the
   Claude desktop app)
 - [GitHub CLI](https://cli.github.com) (`gh`) authenticated for the repositories
-  you work in — the `pr-writer` stage uses it to open draft PRs
+  you work in — `ship-gate.sh publish` uses it to open draft PRs
 
 ## 2. Copy config into place
 
@@ -26,6 +26,7 @@ This installs:
 - `agents/` — the `/ship` stage subagents (`planner`, `coder`, `tester`,
   `reviewer`, `pr-writer`)
 - `commands/ship.md` — the `/ship` orchestrator
+- `scripts/ship-gate.sh` — the `/ship` isolation, scope, and publication gates
 - `skills/` — `pr-review`, `writing-pr-descriptions`, `push-lock`, `stop-slop`,
   `orchestrating-feature-implementation`
 
@@ -44,7 +45,7 @@ Code's aliases, which track the latest model in each family:
 | coder     | `sonnet` | all                                    |
 | tester    | `sonnet` | all                                    |
 | reviewer  | `opus`   | Read, Grep, Glob, Skill (read-only)    |
-| pr-writer | `sonnet` | Read, Grep, Glob, Write, Bash, Skill   |
+| pr-writer | `sonnet` | Read, Grep, Glob, Write, Skill         |
 | (/ship)   | session model | coordination only                 |
 
 ## 4. Superpowers (optional)
@@ -79,5 +80,6 @@ rotating the PAT.
 4. Ask "review this branch" and confirm the `pr-review` skill loads.
 5. Run `/ship "<small contained change>"` to confirm the pipeline flows.
 
-Pipeline files are intentionally excluded from commits by `pr-writer`. Add
-`.pipeline/` to a repository's `.gitignore` if it is not already ignored.
+`ship-gate.sh publish` commits only the reviewed files from the run's worktree,
+so pipeline files never reach a commit. Add `.pipeline/` to a repository's
+`.gitignore` anyway, so run folders and worktrees stay out of searches.

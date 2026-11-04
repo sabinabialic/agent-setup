@@ -1,7 +1,7 @@
 # Skills
 
 Reference for the opencode skills in this repo. Each skill lives under
-`opencode/<name>/SKILL.md` and is loaded by the agent when its `description`
+`opencode/skills/<name>/SKILL.md` and is loaded by the agent when its `description`
 trigger matches the task at hand. This page summarizes what each one does and
 when it fires.
 
@@ -12,15 +12,15 @@ when it fires.
 | [push-lock](#push-lock) | Multiple agents push to one shared branch | Git-native atomic lock ref |
 | [feature-implementation](#feature-implementation) | Implementing a feature via delegated agents | Conductor + worklog orchestration |
 
-A separate, more rigid alternative to `feature-implementation` — the four-stage
-`/ship` pipeline (planner → coder → tester → reviewer) — is documented in the
-[README](../README.md#ship-pipeline).
+A separate, more rigid alternative to `feature-implementation` — the `/ship`
+pipeline (isolate → planner → coder → tester → reviewer → scripted publish) — is
+documented in the [README](../README.md#ship-pipeline).
 
 ---
 
 ## pr-review
 
-`opencode/pr-review/SKILL.md`
+`opencode/skills/pr-review/SKILL.md`
 
 **What it does.** Reviews the code on a branch as a staff engineer, producing
 evidence-based, actionable findings. It looks past local correctness to how the
@@ -49,7 +49,7 @@ review, or evaluating production readiness.
 
 ## writing-pr-descriptions
 
-`opencode/writing-pr-descriptions/SKILL.md`
+`opencode/skills/writing-pr-descriptions/SKILL.md`
 
 **What it does.** Produces PR descriptions optimized for maintainer review
 speed, clarity, and confidence — concise technical context, explicit review
@@ -75,7 +75,7 @@ order.
 
 ## push-lock
 
-`opencode/push-lock/SKILL.md`
+`opencode/skills/push-lock/SKILL.md`
 
 **What it does.** Serializes pushes when multiple agents write against the same
 repository concurrently, so only the push step is mutually exclusive — edits,

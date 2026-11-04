@@ -21,7 +21,8 @@ cp -R cursor/.cursor /path/to/repository/
 ```
 
 The copied `.cursor/` directory contains project rules, skills, the `/ship`
-command, and an environment-backed GitHub MCP definition. Commit it when the
+command and its `scripts/ship-gate.sh`, and an environment-backed GitHub MCP
+definition. Commit it when the
 setup should be shared with a repository team.
 
 ## 3. Configure models without Copilot
@@ -87,5 +88,8 @@ or an independent review only; never assign overlapping edits.
 4. Run `/ship "<small contained change>"` using an approved implementation
    model.
 
-Pipeline files are intentionally excluded from commits by the command. Add
-`.pipeline/` to a repository's `.gitignore` if it is not already ignored.
+`.cursor/scripts/ship-gate.sh publish` commits only the reviewed files from the
+run's worktree, so pipeline files never reach a commit. Add `.pipeline/` to a
+repository's `.gitignore` anyway, so run folders and worktrees stay out of
+searches. The command tells the script to ignore an uncommitted `.cursor/`
+when it checks that the checkout is clean.

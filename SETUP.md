@@ -28,7 +28,8 @@ This installs:
 - `opencode.jsonc` — model defaults, plugins, and the GitHub MCP server
 - `AGENTS.md` — global instructions incl. the workflow decision rule
 - `agent/` + `command/` — the `/ship` pipeline
-- the skill folders (`pr-review`, `feature-implementation`, etc.)
+- `scripts/ship-gate.sh` — the `/ship` isolation, scope, and publication gates
+- `skills/` — `pr-review`, `orchestrating-feature-implementation`, etc.
 
 ## 3. Install plugin dependencies
 
@@ -135,7 +136,8 @@ Sanity checks:
 - Log line `service=mcp key=github type=local found` (no errors).
 - In a fresh chat: "search my repos for X" should call a `github_*`
   tool instead of shelling out to `gh`.
-- Run `/ship "<small change>"` to confirm the pipeline flows.
+- Run `/ship "<small change>"` to confirm the pipeline flows. Add `.pipeline/`
+  to that repository's `.gitignore` first.
 
 ## Model routing reference
 
@@ -145,7 +147,7 @@ Sanity checks:
 | reviewer | `anthropic/claude-opus-4-6` | Independent final judgment   |
 | coder    | `anthropic/claude-sonnet-4-6` | Mechanical implementation  |
 | tester   | `anthropic/claude-sonnet-4-6` | Structured, bounded        |
-| pr-writer| `anthropic/claude-sonnet-4-6` | PR mechanics and description |
+| pr-writer| `anthropic/claude-sonnet-4-6` | PR title, commit message, body |
 | ship     | `anthropic/claude-haiku-4-5` | Pure coordination            |
 | (default)| `anthropic/claude-sonnet-4-6` | Interactive default         |
 | (small)  | `anthropic/claude-haiku-4-5` | Titles, summaries, compaction |

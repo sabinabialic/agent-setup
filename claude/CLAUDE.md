@@ -7,8 +7,9 @@ nature of the work, not by habit.
 
 ### Use `/ship` (deterministic autonomous pipeline)
 
-Command: `/ship "<feature request>"` → planner → coder → tester → reviewer,
-chained through `.pipeline/*.md` with a one-retry review loop.
+Command: `/ship "<feature request>"` → isolated worktree → planner → coder →
+tester → reviewer → scripted publication, chained through
+`.pipeline/<date>-<slug>/` with one repair round.
 
 Reach for `/ship` when ALL of these hold:
 - The change is **bounded and well understood** — you could write the spec
@@ -50,10 +51,10 @@ When in doubt between `/ship` and the orchestration skill, take the heavier one
 ## Single source of truth for standards
 
 Review standards live in the `pr-review` skill. The `/ship` reviewer agent
-applies its full set of lenses (correctness, concurrency, scalability,
-security/privacy, operational risk, maintainability) on top of spec
-conformance; defer to `pr-review` rather than duplicating review criteria
-elsewhere.
+applies its full set of lenses (correctness, edge cases, security,
+concurrency/scalability, operational risk, maintainability) to the candidate
+patch on top of spec conformance, plus ship checks for acceptance criteria,
+scope, and minimality; defer to `pr-review` for the standard behind each lens.
 
 ## Keep PR descriptions in sync with pushes
 

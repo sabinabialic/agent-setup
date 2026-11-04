@@ -75,6 +75,12 @@ for a in planner coder tester reviewer pr-writer; do
   if [ "$(body "$HERE/opencode/agent/$a.md")" = "$(body "$HERE/claude/agents/$a.md")" ]; then pass "$a agent text matches between opencode and claude"
   else failc "$a agent text differs between opencode/agent and claude/agents"; fi
 done
+for skill in pr-review writing-pr-descriptions; do
+  for copy in "$HERE/claude/skills/$skill/SKILL.md" "$HERE/cursor/.cursor/skills/$skill/SKILL.md"; do
+    if cmp -s "$HERE/opencode/skills/$skill/SKILL.md" "$copy"; then pass "${copy#"$HERE"/} matches opencode/skills/$skill"
+    else failc "${copy#"$HERE"/} differs from opencode/skills/$skill/SKILL.md"; fi
+  done
+done
 steps() { awk '/^## Sequence$/{p=1} p' "$1"; }
 [ "$(steps "$HERE/opencode/agent/ship.md")" = "$(steps "$HERE/claude/commands/ship.md")" ] &&
   pass "orchestrator steps match between opencode and claude" || failc "orchestrator steps differ between opencode and claude"

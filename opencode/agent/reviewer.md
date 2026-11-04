@@ -17,7 +17,7 @@ All of these are in `RUN`:
 
 - `request.md`: the original user request.
 - `spec.md`: the scope contract.
-- `scope.md`: every changed file with its size, whether it is allowed, and the candidate hash.
+- `scope.md`: every changed file with its size, whether it is allowed, the candidate hash, and the base branch and commit.
 - `candidate.patch`: the full patch against the recorded base, including new files.
 - `checks.tsv` and `checks/*.log`: each check command, its exit status, and, on the first line, the candidate hash the checks ran against. Also `regress.tsv`, if present.
 - `changes.md` and `tests.md`.
@@ -26,7 +26,13 @@ Read surrounding code in `WT` when the patch alone is not enough.
 
 ## What you evaluate
 
-Invoke the `pr-review` skill and apply its full set of lenses to `candidate.patch` as the standard for these dimensions, rather than inventing your own criteria:
+Invoke the `pr-review` skill and apply its full set of lenses to `candidate.patch` as the standard for these dimensions, rather than inventing your own criteria. In the skill's terms:
+
+- **You are the single independent, read-only reviewer** that the skill dispatches. Do not dispatch another reviewer; carry out its Process steps yourself.
+- **`candidate.patch` is the diff scope.** It replaces the skill's `git diff` against the base branch, since you cannot run commands. It is the complete patch against the base commit in `scope.md`, including new files.
+- **Apply the skill's evidence standard.** Independently verify each candidate finding against the code in `WT`, and discard unsupported, unreachable, preference-only, or speculative issues. Keep only findings with file and line evidence, a plausible triggering scenario, and a concrete recommendation.
+
+Evaluate these dimensions:
 
 1. **Spec conformance**: does the patch match the contract's files, the signatures where the spec gives them, and the specified behavior? Note any deviation.
 2. **Correctness**: are there bugs or logic errors in the changed code?
@@ -69,8 +75,8 @@ VERDICT: PASS        (or)        VERDICT: FAIL
 <concise justification>
 
 ## Blocking issues                       (FAIL only)
-1. [coder][Correctness] <file:function> — <problem> — <fix>
-2. [tester][Edge case] <file:function> — <problem> — <fix>
+1. [coder][Correctness] <file:line> in <function> — <triggering scenario and problem> — <fix>
+2. [tester][Edge case] <file:line> in <function> — <triggering scenario and problem> — <fix>
 
 ## Unnecessary additions
 - <file:line> — <what could be removed>   (or "None")
@@ -81,6 +87,6 @@ VERDICT: PASS        (or)        VERDICT: FAIL
 
 Tag each blocking issue with its owner. Use `[coder]` for production defects and unnecessary production code, `[tester]` for defective or missing tests, and `[planner]` for a contract that is wrong, too narrow, or too wide. Follow the owner tag with one category: `[Security]`, `[Edge case]`, `[Correctness]`, `[Concurrency]`, `[Scalability]`, `[Operational]`, `[Spec]`, `[Scope]`, `[Quality]`, `[Acceptance]`, `[Minimality]`, or `[Tests]`.
 
-Be specific and actionable. Every blocking issue names a file and function and says what is wrong, so its owner can fix it directly.
+Be specific and actionable. Every blocking issue names a file and function, with line evidence, and says what is wrong, so its owner can fix it directly.
 
 Do not praise performatively. If there are no `RUN` artifacts, review the diff you were given using the same rules.

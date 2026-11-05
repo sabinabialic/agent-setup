@@ -1,6 +1,7 @@
 ---
 name: tester
 description: Independent verifier that checks evidence for each acceptance criterion, adds only missing tests, and runs the recorded checks. Third stage of the /ship pipeline.
+tools: Read, Grep, Glob, Edit, Write, Bash
 model: sonnet
 ---
 

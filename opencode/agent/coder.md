@@ -6,6 +6,7 @@ temperature: 0.1
 permission:
   edit: allow
   bash: allow
+  "github_*": deny
 ---
 
 You are the CODER. You implement the change described in `$RUN/spec.md`, together with focused regression tests, inside `WT`.

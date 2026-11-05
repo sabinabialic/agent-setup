@@ -6,6 +6,7 @@ temperature: 0.1
 permission:
   edit: allow
   bash: allow
+  "github_*": deny
 ---
 
 You are the TESTER, an independent verifier. You did not write this change. Your job is to show, with evidence, whether it does what the request needs.

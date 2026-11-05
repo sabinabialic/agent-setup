@@ -67,7 +67,7 @@ bash tests/ship-gate.test.sh
 
 The test fails if the copies drift, and it exercises the gates in a throwaway repository. It also checks:
 
-- `AGENTS.md` and `CLAUDE.md` are identical, and every shared skill file matches across hosts. The Cursor `push-lock` rewrite is the one exception: it drops rules, so it is not held identical.
+- `AGENTS.md` and `CLAUDE.md` are identical, and every shared skill file matches across hosts.
 - Both reviewer prompts (`reviewer.md` and the Cursor command) keep every review dimension, blocking rule, evidence requirement, and owner and category tag.
 - The scope rule is identical in the coder, tester, and Cursor prompts.
 - Stage agents keep their tool limits: no GitHub MCP tools, a read-only reviewer, and Read, Grep, Glob, Edit, Write, and Bash for the coder and tester.

@@ -97,12 +97,7 @@ same_copies() {
   done
 }
 same_copies stop-slop/SKILL.md stop-slop/references/examples.md stop-slop/references/phrases.md \
-  stop-slop/references/structures.md orchestrating-feature-implementation/worklog-template.md
-# The Cursor push-lock copy is a shorter rewrite that drops rules (holder id and
-# timestamp in the lease, release before retrying, logging a stale reclaim), so
-# only the opencode and claude copies are held identical.
-cmp -s "$HERE/opencode/skills/push-lock/SKILL.md" "$HERE/claude/skills/push-lock/SKILL.md" &&
-  pass "claude/skills/push-lock/SKILL.md matches" || failc "claude/skills/push-lock/SKILL.md differs from opencode/skills/push-lock/SKILL.md"
+  stop-slop/references/structures.md orchestrating-feature-implementation/worklog-template.md push-lock/SKILL.md
 
 # Orchestration copies differ only in the host's dispatch section and discovery agent names.
 shared_orch() {

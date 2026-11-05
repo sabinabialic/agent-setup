@@ -5,6 +5,42 @@ description: Use when implementing a feature from a source document or current-s
 
 # Orchestrating Feature Implementation
 
+## Choosing This Workflow
+
+This skill and `/ship` are not interchangeable. Pick by the nature of the work,
+not by habit.
+
+Use `/ship "<feature request>"`, the autonomy lane, when ALL of these hold:
+- The change is bounded and well understood: you could write the spec up front
+  without discovery.
+- It should run autonomously, with no back-and-forth.
+- It touches a flow that already exists in the repo, such as a flag, an
+  endpoint, or a contained fix.
+
+`/ship` runs an isolated worktree through planner, coder, tester, and reviewer,
+then scripted publication, chained through `.pipeline/<date>-<slug>/` with one
+repair round. It is the same pipeline used for scheduled and CI runs.
+
+Use this skill, the high-stakes lane where you conduct and subagents execute,
+when ANY of these hold:
+- The feature is large or ambiguous and needs a discovery phase.
+- Requirements may shift as you learn, so you want blocking-question
+  discipline and an evolving worklog.
+- You want to stay in the loop and exercise judgment at phase gates.
+- It adds a new subsystem, cuts across components, or restructures interfaces.
+
+`subagent-driven-development` and `executing-plans` run an already-written
+plan. They come after brainstorming and writing-plans, not instead of either
+lane.
+
+| Question | If yes |
+|----------|--------|
+| Can I fully spec this upfront and walk away? | `/ship` |
+| Does this need discovery or my judgment mid-flight? | this skill |
+| Do I already have a written plan to execute? | `subagent-driven-development` |
+
+When in doubt between `/ship` and this skill, take the heavier one: this skill.
+
 ## Conductor Principle
 
 The primary agent is the conductor and delegates by default. It owns scope,

@@ -1,6 +1,7 @@
 ---
 name: coder
 description: Implements the scope contract with focused regression tests, keeping the change minimal. Second stage of the /ship pipeline.
+tools: Read, Grep, Glob, Edit, Write, Bash
 model: sonnet
 ---
 

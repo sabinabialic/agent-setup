@@ -84,6 +84,117 @@ done
 steps() { awk '/^## Sequence$/{p=1} p' "$1"; }
 [ "$(steps "$HERE/opencode/agent/ship.md")" = "$(steps "$HERE/claude/commands/ship.md")" ] &&
   pass "orchestrator steps match between opencode and claude" || failc "orchestrator steps differ between opencode and claude"
+cmp -s "$HERE/opencode/AGENTS.md" "$HERE/claude/CLAUDE.md" &&
+  pass "claude/CLAUDE.md matches opencode/AGENTS.md" || failc "claude/CLAUDE.md differs from opencode/AGENTS.md"
+
+# same_copies <relative path under each skills dir>...: byte-identical in all three hosts.
+same_copies() {
+  local rel copy
+  for rel in "$@"; do
+    for copy in "$HERE/claude/skills/$rel" "$HERE/cursor/.cursor/skills/$rel"; do
+      cmp -s "$HERE/opencode/skills/$rel" "$copy" && pass "${copy#"$HERE"/} matches" || failc "${copy#"$HERE"/} differs from opencode/skills/$rel"
+    done
+  done
+}
+same_copies stop-slop/SKILL.md stop-slop/references/examples.md stop-slop/references/phrases.md \
+  stop-slop/references/structures.md orchestrating-feature-implementation/worklog-template.md push-lock/SKILL.md
+
+# Orchestration copies differ only in the host's dispatch section and discovery agent names.
+shared_orch() {
+  awk '/^## Dispatching Roles In /{skip=1; next} /^## /{skip=0} !skip' "$1" |
+    sed -E 's/`[Ee]xplore`( or `general`|\/`general`)? agents/<discovery> agents/g'
+}
+for f in SKILL.md agent-contract.md; do
+  for host in claude/skills cursor/.cursor/skills; do
+    [ "$(shared_orch "$HERE/opencode/skills/orchestrating-feature-implementation/$f")" = "$(shared_orch "$HERE/$host/orchestrating-feature-implementation/$f")" ] &&
+      pass "$host/orchestrating-feature-implementation/$f shared text matches" ||
+      failc "$host/orchestrating-feature-implementation/$f shared text differs from opencode"
+  done
+done
+
+# require <file> <phrase>...: every phrase appears literally in the file.
+require() {
+  local f="$1" p missing=""; shift
+  for p in "$@"; do grep -qF -- "$p" "$f" || missing="$missing [$p]"; done
+  [ -z "$missing" ] && pass "${f#"$HERE"/} has all $# required phrases" || failc "${f#"$HERE"/} is missing:$missing"
+}
+
+section "0b. reviewer coverage, scope rule, and stage tool access"
+REVIEW_PHRASES=(
+  "**Spec conformance**" "**Correctness**" "**Edge-case coverage**" "**Security and vulnerabilities**"
+  "**Concurrency and scalability**" "**Operational risk**" "**Scope**" "**Quality and maintainability**"
+  "**Acceptance**" "**Candidate**" "**Minimality**"
+  "null or undefined values" "boundary conditions" "malformed input" "retries" "timeouts and cancellation"
+  "partial failure" "injection" "unsafe deserialization" "secrets in code or logs" "missing input validation"
+  "authorization gaps at trust boundaries" "sensitive-data exposure" "unsafe dependency usage"
+  "N+1" "unbounded growth" "rollout or rollback"
+  "a real bug" "plausible exploit path" "no meaningful test" "real risk of incorrect or unsafe behavior"
+  "real risk under load or parallel access" "failing" "unjustified unlisted file" "material unnecessary additions"
+  "speculative hardening without evidence" "risks in code the patch does not touch" "style preferences"
+  "pr-review" "discard unsupported, unreachable, preference-only, or speculative issues"
+  "file and line evidence" "triggering scenario" "concrete recommendation"
+  "VERDICT: PASS" "VERDICT: FAIL" '`[coder]`' '`[tester]`' '`[planner]`'
+  '`[Security]`' '`[Edge case]`' '`[Correctness]`' '`[Concurrency]`' '`[Scalability]`' '`[Operational]`'
+  '`[Spec]`' '`[Scope]`' '`[Quality]`' '`[Acceptance]`' '`[Minimality]`' '`[Tests]`'
+)
+require "$HERE/opencode/agent/reviewer.md" "${REVIEW_PHRASES[@]}"
+require "$HERE/cursor/.cursor/commands/ship.md" "${REVIEW_PHRASES[@]}" \
+  "must delegate the review to one read-only subagent" "readonly: true" "not independent" \
+  "Never run a third review" "Repair, at most once" "with a fresh read-only subagent"
+require "$HERE/opencode/agent/ship.md" "Never run a third review" "Repair, at most once" \
+  '`planner` for `[planner]`' '`coder` for `[coder]`' '`tester` for `[tester]`' "Dispatches carry paths"
+require "$HERE/opencode/skills/pr-review/SKILL.md" "## What to Consider" "1. **Correctness and code quality**" \
+  "2. **Edge cases and failure handling**" "3. **Concurrency and consistency**" "4. **Scalability and performance**" \
+  "5. **Security and privacy**" "6. **Reliability and operability**" "7. **Maintainability and evolution**" \
+  "## Process" "## Output Format" "## Common Mistakes"
+
+scope_rule() { grep -A4 '^Implement the smallest complete change satisfying the acceptance criteria\.$' "$1"; }
+RULE="$(scope_rule "$HERE/opencode/agent/coder.md")"
+[ "$(printf '%s\n' "$RULE" | wc -l | tr -d ' ')" = 5 ] && pass "coder scope rule has 5 lines" || failc "coder scope rule not found"
+for f in opencode/agent/tester.md cursor/.cursor/commands/ship.md; do
+  [ -n "$RULE" ] && [ "$(scope_rule "$HERE/$f")" = "$RULE" ] && pass "$f scope rule matches coder" || failc "$f scope rule differs from coder"
+done
+
+fm() { awk 'NR==1&&/^---$/{f=1; next} f&&/^---$/{exit} f' "$1"; }
+for a in ship planner coder tester reviewer pr-writer; do
+  fm "$HERE/opencode/agent/$a.md" | grep -qF '"github_*": deny' && pass "opencode $a denies github_* MCP tools" ||
+    failc "opencode $a does not deny github_* MCP tools"
+done
+fm "$HERE/opencode/agent/reviewer.md" | grep -q '^  edit: deny$' && fm "$HERE/opencode/agent/reviewer.md" | grep -q '^  bash: deny$' &&
+  pass "opencode reviewer stays read-only" || failc "opencode reviewer lost edit/bash deny"
+for a in planner coder tester reviewer pr-writer; do
+  tools="$(fm "$HERE/claude/agents/$a.md" | sed -n 's/^tools: //p')"
+  if [ -n "$tools" ] && ! printf '%s' "$tools" | grep -q 'mcp__'; then pass "claude $a has a tools allowlist without MCP ($tools)"
+  else failc "claude $a must have a tools allowlist without MCP tools"; fi
+done
+for a in coder tester; do
+  tools=", $(fm "$HERE/claude/agents/$a.md" | sed -n 's/^tools: //p'),"
+  missing=""; for t in Read Grep Glob Edit Write Bash; do case "$tools" in *", $t,"*) ;; *) missing="$missing $t" ;; esac; done
+  [ -z "$missing" ] && pass "claude $a keeps Read, Grep, Glob, Edit, Write, Bash" || failc "claude $a lacks:$missing"
+done
+case ", $(fm "$HERE/claude/agents/reviewer.md" | sed -n 's/^tools: //p')," in
+  *", Edit,"*|*", Write,"*|*", Bash,"*) failc "claude reviewer can edit or run commands" ;;
+  *) pass "claude reviewer stays read-only" ;;
+esac
+
+section "0c. always-loaded instruction budgets and essentials"
+# budget <max bytes> <label> <file>...: combined size stays under the cap.
+budget() {
+  local max="$1" label="$2" n; shift 2
+  n="$(cat "$@" | wc -c | tr -d ' ')"
+  [ "$n" -le "$max" ] && pass "$label: $n bytes (budget $max)" || failc "$label: $n bytes exceeds budget $max"
+}
+budget 1400 "opencode/AGENTS.md" "$HERE/opencode/AGENTS.md"
+budget 1400 "claude/CLAUDE.md" "$HERE/claude/CLAUDE.md"
+budget 1500 "cursor workflow rule" "$HERE/cursor/.cursor/rules/workflow.mdc"
+for host in opencode/skills claude/skills cursor/.cursor/skills; do
+  n="$(for s in "$HERE/$host"/*/SKILL.md; do fm "$s"; done | wc -c | tr -d ' ')"
+  [ "$n" -le 1300 ] && pass "$host skill frontmatter: $n bytes (budget 1300)" || failc "$host skill frontmatter: $n bytes exceeds budget 1300"
+done
+require "$HERE/opencode/AGENTS.md" '`/ship' "orchestrating-feature-implementation" "subagent-driven-development" \
+  "use the skill" "Choosing This" "pr-review" "writing-pr-descriptions" "gh pr view" "gh pr edit" "every push"
+require "$HERE/opencode/skills/orchestrating-feature-implementation/SKILL.md" "## Choosing This Workflow" \
+  "ALL of these hold" "ANY of these hold" "take the heavier one" "scheduled and CI runs" "subagent-driven-development"
 
 section "1. clean pass: isolate, scope, verify, regress, review, publish"
 expect 0 "init creates branch and worktree from origin/main" "$GATE" init -- "Default greeting for empty name"

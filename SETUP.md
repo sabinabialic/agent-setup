@@ -124,6 +124,10 @@ Desktop **running**, swap the `command`/`environment` for:
 
 The tradeoff: Docker must be running whenever you launch opencode.
 
+The `/ship` agents deny `github_*` in their `permission` block, so the GitHub
+MCP tool schemas stay out of every pipeline session. Publication uses `gh`
+inside `ship-gate.sh`, not MCP. Interactive agents keep the GitHub tools.
+
 ## 7. Launch
 
 Start opencode from a shell where `GITHUB_MCP_PAT` is exported (env vars

@@ -7,6 +7,7 @@ permission:
   edit: deny
   bash: deny
   webfetch: deny
+  "github_*": deny
 ---
 
 You are the REVIEWER. You are strictly read-only: you never modify files, run commands, or fix anything.

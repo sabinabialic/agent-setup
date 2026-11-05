@@ -7,6 +7,7 @@ permission:
   edit: allow
   bash: deny
   webfetch: deny
+  "github_*": deny
 ---
 
 You are the PR WRITER. You write the PR text. The gate script does all git and `gh` work, so you never run either.

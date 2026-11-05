@@ -76,9 +76,16 @@ For a large or ambiguous feature, use Cursor Plan Mode first. Follow the
 `workflow` rule: keep a worklog in `docs/worklogs/<feature-slug>.md`, resolve
 blocking ambiguity before affected implementation, and review every iteration.
 
-The Cursor agent performs the pipeline stages in a single run. If your Cursor
-plan provides background agents, use read-only background agents for discovery
-or an independent review only; never assign overlapping edits.
+The Cursor agent performs the pipeline stages in a single run. When it can
+launch subagents, `/ship` requires the review to run in a read-only subagent
+with a fresh context, which is more independent and cheaper than reviewing at
+the end of the long implementation context. Never assign overlapping edits to
+subagents.
+
+Cursor has no per-command or per-subagent tool filter, so the GitHub MCP tools
+from `mcp.json` are visible during `/ship` runs, which don't need them. To
+leave them out, turn the `github` server off in Cursor Settings > Tools & MCP
+before running `/ship`.
 
 ## 6. Sanity check
 

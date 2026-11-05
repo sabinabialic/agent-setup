@@ -58,6 +58,23 @@ from the official marketplace at user scope:
 claude plugin install superpowers@claude-plugins-official --scope user
 ```
 
+### Ponytail (optional, host-level)
+
+If you use the Ponytail plugin, keep its ruleset out of the `/ship` stage
+agents, which already enforce minimality through the reviewer's Minimality
+check. Ponytail injects into every subagent unless a matcher limits it. Add
+this to `~/.claude/settings.json`:
+
+```json
+"env": { "PONYTAIL_SUBAGENT_MATCHER": "^(Explore|Plan|general-purpose)$" }
+```
+
+The built-in `Explore`, `Plan`, and `general-purpose` subagents keep Ponytail,
+and `planner`, `coder`, `tester`, `reviewer`, and `pr-writer` get none. The
+match is anchored, so `Plan` does not match `planner`. Leaving out `Plan`
+(`^(Explore|general-purpose)$`) also drops Ponytail from the built-in plan-mode
+subagent.
+
 ## 5. GitHub MCP (optional)
 
 Create the read-only fine-grained PAT described in [SETUP.md](SETUP.md#5-github-mcp-connector--create-and-export-the-pat),

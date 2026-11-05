@@ -69,7 +69,11 @@ The test fails if the copies drift, and it exercises the gates in a throwaway re
 
 ## Choosing a workflow
 
-`/ship` and `feature-implementation` are not interchangeable. The decision rule
-for which to use — plus how `subagent-driven-development` fits downstream — lives
-in [opencode/AGENTS.md](opencode/AGENTS.md), which opencode auto-loads as global
-instructions when copied to `~/.config/opencode/AGENTS.md`.
+`/ship` and `feature-implementation` are not interchangeable. The short rule
+lives in [opencode/AGENTS.md](opencode/AGENTS.md) (identical to
+[claude/CLAUDE.md](claude/CLAUDE.md)), which every session and subagent loads,
+so it stays small. The full decision rule, including how
+`subagent-driven-development` fits downstream, is the "Choosing This Workflow"
+section of the
+[orchestrating-feature-implementation skill](opencode/skills/orchestrating-feature-implementation/SKILL.md),
+which loads only when needed.
